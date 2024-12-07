@@ -19,9 +19,9 @@
       devshell.startup.pre-commit.text = config.pre-commit.installationScript;
       commands = [
         {
-          help = "Run a dev environment of frontend";
-          name = "front";
-          command = "cd frontend && ${pkgs.nodejs}/bin/npm install && ${pkgs.nodejs}/bin/npm run dev";
+          help = "Get a dev environment up and running with everything you need!";
+          name = "devenv";
+          command = "nix run .";
         }
       ];
     };
