@@ -2,7 +2,7 @@
   perSystem = {pkgs, ...}: let
     inherit (inputs.nixpkgs) lib;
     backendPath = ./../backend;
-    asgiApp = "backend.hello:app";
+    asgiApp = "backend.main:app";
     workspace = inputs.uv2nix.lib.workspace.loadWorkspace {workspaceRoot = backendPath;};
     overlay = workspace.mkPyprojectOverlay {
       sourcePreference = "wheel";
