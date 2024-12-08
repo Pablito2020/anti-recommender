@@ -17,7 +17,7 @@
       projectRootFile = "flake.nix";
       package = ./..;
     };
-    derivation = {
+    createDerivation = buildScript: {
       config,
       dream2nix,
       ...
@@ -36,6 +36,9 @@
           stdenv
           ;
       };
+      nodejs-granular-v3 = {
+        inherit buildScript;
+      };
       nodejs-package-lock-v3 = {
         packageLockFile = "${config.mkDerivation.src}/package-lock.json";
       };
@@ -47,29 +50,40 @@
     program = pkgs.lib.getExe server;
   in {
     # nix build .#frontend generates the static files
-    packages.frontend = inputs.dream2nix.lib.evalModules {
-      packageSets.nixpkgs = inputs.nixpkgs.legacyPackages.${system};
-      modules = [
-        derivation
-        {
-          inherit paths;
-        }
-      ];
-    };
-
-    # nix build .#frontend-docker builds a docker image with caddy
-    packages.frontend-docker = pkgs.dockerTools.buildLayeredImage {
-      name = "frontend-antirecommender";
-      tag = "latest";
-      config = {
-        Cmd = [
-          "${pkgs.caddy}/bin/caddy"
-          "file-server"
-          "--listen"
-          "0.0.0.0:5173"
-          "--root"
-          staticFiles
+    packages = {
+      frontend = inputs.dream2nix.lib.evalModules {
+        packageSets.nixpkgs = inputs.nixpkgs.legacyPackages.${system};
+        modules = [
+          (createDerivation null)
+          {
+            inherit paths;
+          }
         ];
+      };
+      frontend-production = inputs.dream2nix.lib.evalModules {
+        packageSets.nixpkgs = inputs.nixpkgs.legacyPackages.${system};
+        modules = [
+          (createDerivation "npm run production")
+          {
+            inherit paths;
+          }
+        ];
+      };
+
+      # nix build .#frontend-docker builds a docker image with caddy
+      frontend-docker = pkgs.dockerTools.buildLayeredImage {
+        name = "frontend-antirecommender";
+        tag = "latest";
+        config = {
+          Cmd = [
+            "${pkgs.caddy}/bin/caddy"
+            "file-server"
+            "--listen"
+            "0.0.0.0:5173"
+            "--root"
+            staticFiles
+          ];
+        };
       };
     };
 

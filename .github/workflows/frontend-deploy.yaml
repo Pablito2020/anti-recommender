@@ -41,7 +41,7 @@ jobs:
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Build Webpage
-        run: nix build .#frontend
+        run: nix build .#frontend-production
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
