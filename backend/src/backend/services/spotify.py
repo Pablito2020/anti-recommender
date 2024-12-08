@@ -12,15 +12,23 @@ class SpotifyService:
         try:
             self.sp = Spotify(auth=access_token)
         except SpotifyException as e:
-            raise HTTPException(status_code=400,
-                                detail=f"Error loading your spotify profile... Error message: ${e.reason}", )
+            raise HTTPException(
+                status_code=400,
+                detail=f"Error loading your spotify profile... Error message: ${e.reason}",
+            )
 
     @property
     def recently_played(self) -> List[Song]:
-        recently_played: RecentlyPlayed = RecentlyPlayed(**self.sp.current_user_recently_played())
+        recently_played: RecentlyPlayed = RecentlyPlayed(
+            **self.sp.current_user_recently_played()
+        )
         songs = []
         for played in recently_played.items:
-            song = Song(name=played.track.name,
-                        image=None if len(played.track.album.images) == 0 else played.track.album.images[0].url)
+            song = Song(
+                name=played.track.name,
+                image=None
+                if len(played.track.album.images) == 0
+                else played.track.album.images[0].url,
+            )
             songs.append(song)
         return songs

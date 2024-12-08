@@ -7,7 +7,10 @@
       check.enable = true;
       settings = {
         hooks = {
-          treefmt.enable = true;
+          treefmt = {
+            enable = true;
+            pass_filenames = false; # Run it on all the files inside the repository
+          };
           commitizen.enable = true;
         };
       };

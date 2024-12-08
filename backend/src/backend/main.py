@@ -1,5 +1,3 @@
-from asyncio import sleep
-
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
@@ -35,8 +33,4 @@ def root():
 def recommend_songs_for_user_with_token(data: UserToken) -> RecommendedSong:
     spotify = SpotifyService(access_token=data.access_token)
     songs = spotify.recently_played
-    return RecommendedSong(
-        isRandom=True,
-        fromSongs=songs,
-        recommended=songs[0]
-    )
+    return RecommendedSong(isRandom=True, fromSongs=songs, recommended=songs[0])

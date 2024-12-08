@@ -1,13 +1,16 @@
 from typing import List, Optional
 from pydantic import BaseModel
 
+
 class ExternalUrls(BaseModel):
     spotify: str
+
 
 class Image(BaseModel):
     height: int
     url: str
     width: int
+
 
 class Artist(BaseModel):
     external_urls: ExternalUrls
@@ -16,6 +19,7 @@ class Artist(BaseModel):
     name: str
     type: str
     uri: str
+
 
 class Album(BaseModel):
     album_type: str
@@ -32,8 +36,10 @@ class Album(BaseModel):
     type: str
     uri: str
 
+
 class ExternalIds(BaseModel):
     isrc: str
+
 
 class Track(BaseModel):
     album: Album
@@ -54,14 +60,17 @@ class Track(BaseModel):
     type: str
     uri: str
 
+
 class PlayedItem(BaseModel):
     track: Track
     played_at: str
     context: Optional[dict]
 
+
 class Cursors(BaseModel):
     after: str
     before: str
+
 
 class RecentlyPlayed(BaseModel):
     items: List[PlayedItem]
