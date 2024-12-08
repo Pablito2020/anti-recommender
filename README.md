@@ -1,21 +1,11 @@
 # Spotify Antirecommender system
 
-## Configure spotify api for devs
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/703f0815-ab00-43ff-8ce7-e6f2adac8ed6" width="350" alt="Spotify Antirecommender Logo">
+  
+  <p align="center">
+    <BR>
+  Because we want you to listen music that really matters
+</p>
 
-Go to the [spotify for devs url](https://developer.spotify.com/dashboard) and create a new app. Be aware that you have to put the correct redirect link.
-
-## El Despatx credentials
-
-Our credentials for the project live inside the credentials file, which is encrypted with [git-crypt](https://github.com/AGWA/git-crypt) with our own gpg keys. So, if you're one of the main developers, you can see the files with:
-
-```bash
-$ git-crypt unlock
-```
-
-## Developement environment
-
-We use [nix](https://nixos.org/) as the build tool of the project. You can use the developement environment we provide with:
-
-```
-$ nix develop
-```
+For more information about how to set it up, issues, etc. See the [wiki page](https://github.com/Pablito2020/anti-recommender/wiki).

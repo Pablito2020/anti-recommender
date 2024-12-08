@@ -37,12 +37,11 @@
       imports = [
         # Dev environment, linters, etc
         ./nix/devshell.nix
-        ./nix/pre-commit.nix
         ./nix/treefmt.nix
         ./nix/process-compose.nix
-        # Build
         ./nix/backend.nix
         ./nix/frontend.nix
+        ./nix/conventional-commits.nix
       ];
       systems = [
         "x86_64-linux"
