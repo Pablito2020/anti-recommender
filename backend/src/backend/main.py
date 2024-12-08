@@ -25,11 +25,15 @@ app.add_middleware(
 
 
 @app.get("/")
-def root():
+def root() -> str:
     return "Hello world!"
 
 
-@app.post("/recommend")
+@app.post(
+    path="/recommend",
+    response_model=RecommendedSong,
+    status_code=200,
+)
 def recommend_songs_for_user_with_token(data: UserToken) -> RecommendedSong:
     spotify = SpotifyService(access_token=data.access_token)
     songs = spotify.recently_played

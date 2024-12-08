@@ -1,4 +1,7 @@
 {inputs, ...}: {
+  imports = [
+    inputs.treefmt-nix.flakeModule
+  ];
   perSystem = {pkgs, ...}: let
     inherit (inputs.nixpkgs) lib;
     backendPath = ./../backend;
@@ -22,6 +25,10 @@
       cd ${backendPath}
       ${venv}/bin/uvicorn ${asgiApp}
     '';
+
+    mypy = pkgs.writeShellScriptBin "mypy" ''
+      "${venv}/bin/mypy"
+    '';
   in {
     packages.backend = pkgs.dockerTools.buildLayeredImage {
       name = "backend-antirecommender";
@@ -31,6 +38,17 @@
           "${venv}/bin/uvicorn"
           asgiApp
         ];
+      };
+    };
+    treefmt.config.programs = {
+      mypy = {
+        enable = true;
+        package = mypy;
+        directories = {
+          "backend".modules = [
+            "src"
+          ];
+        };
       };
     };
     apps.backend.program = "${pkgs.lib.getExe start}";

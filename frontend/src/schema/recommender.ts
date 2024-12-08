@@ -20,17 +20,17 @@ export interface ApiError {
 }
 
 export const isRecommender = (
-  recommendation: any,
+  recommendation: unknown,
 ): recommendation is Recommender =>
   typeof recommendation === "object" &&
   recommendation !== null &&
-  recommendation.hasOwnProperty("isRandom") &&
+  Object.hasOwn(recommendation, "isRandom") &&
   typeof recommendation.isRandom === "boolean";
 
-export const isApiError = (error: any): error is ApiError =>
+export const isApiError = (error: unknown): error is ApiError =>
   typeof error === "object" &&
   error !== null &&
-  error.hasOwnProperty("detail") &&
+  Object.hasOwn(error, "detail") &&
   typeof error.detail === "string";
 
 export type RecommenderResult = Result<Recommender>;

@@ -61,10 +61,17 @@ class Track(BaseModel):
     uri: str
 
 
+class PlayedContext(BaseModel):
+    type: str
+    href: str
+    external_urls: ExternalUrls
+    uri: str
+
+
 class PlayedItem(BaseModel):
     track: Track
     played_at: str
-    context: Optional[dict]
+    context: Optional[PlayedContext]
 
 
 class Cursors(BaseModel):

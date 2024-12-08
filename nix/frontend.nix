@@ -3,6 +3,9 @@
   self,
   ...
 }: {
+  imports = [
+    inputs.pre-commit-hooks.flakeModule
+  ];
   perSystem = {
     system,
     pkgs,
@@ -62,6 +65,19 @@
           "--root"
           staticFiles
         ];
+      };
+    };
+    pre-commit = {
+      check.enable = true;
+      settings = {
+        hooks = {
+          eslint = {
+            enable = true;
+            pass_filenames = false;
+            entry = "${self.packages.${system}.frontend}/lib/node_modules/.bin/eslint -c frontend/eslint.config.js frontend";
+            settings.extensions = "\\.(js|ts|jsx|tsx|md|mdx|cjs|ts)$";
+          };
+        };
       };
     };
     apps.frontend.program = program;

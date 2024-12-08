@@ -36,7 +36,7 @@ const parseAxiosResponse: (response: AxiosResponse) => Result<Recommender> = (
 };
 
 const getApiRecommendation: (
-  userToken: any,
+  userToken: unknown,
 ) => Promise<Result<Recommender>> = async (userToken) => {
   try {
     const response = await axios.post(`${backend}/recommend`, userToken);
