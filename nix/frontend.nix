@@ -48,6 +48,21 @@
     staticFiles = "${self.packages.${system}.frontend}/lib/node_modules/anti-recommender/dist";
     server = pkgs.writeShellScriptBin "server-frontend" "${pkgs.caddy}/bin/caddy file-server --listen localhost:5173 --root ${staticFiles}";
     program = pkgs.lib.getExe server;
+
+    caddyConfig =
+      pkgs.writeTextFile {
+        name = "config";
+        text = "
+    :5173 {
+    	@isInFirst file {
+    		root /mnt
+    	}
+    	root @isInFirst /mnt
+    	root * ${staticFiles}
+    	file_server
+    }
+    ";
+      };
   in {
     # nix build .#frontend generates the static files
     packages = {
@@ -77,11 +92,11 @@
         config = {
           Cmd = [
             "${pkgs.caddy}/bin/caddy"
-            "file-server"
-            "--listen"
-            "0.0.0.0:5173"
-            "--root"
-            staticFiles
+            "run"
+            "--config"
+            "${caddyConfig}"
+            "--adapter"
+            "caddyfile"
           ];
         };
       };
