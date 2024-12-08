@@ -9,10 +9,6 @@ import {
   Result,
 } from "../schema/recommender.ts";
 
-const spotifyClientId = "f3d641d567484158967a7832a6b8d418";
-const frontend = "http://localhost:5173";
-const backend = "http://localhost:8000";
-
 const parseAxiosResponse: (response: AxiosResponse) => Result<Recommender> = (
   response,
 ) => {
@@ -38,6 +34,14 @@ const parseAxiosResponse: (response: AxiosResponse) => Result<Recommender> = (
 const getApiRecommendation: (
   userToken: unknown,
 ) => Promise<Result<Recommender>> = async (userToken) => {
+  const backend = window.env.BACKEND_URL;
+  if (!backend) {
+    return {
+      isError: true,
+      error:
+        "Person who deployed the app didn't specify a backend server url in frontend...",
+    };
+  }
   try {
     const response = await axios.post(`${backend}/recommend`, userToken);
     return parseAxiosResponse(response);
@@ -57,6 +61,15 @@ const getApiRecommendation: (
 export const getRecommendations: () => Promise<
   Result<Recommender>
 > = async () => {
+  const spotifyClientId = window.env.SPOTIFY_CLIENT_ID;
+  const frontend = window.env.FRONTEND_URL;
+  if (!spotifyClientId || !frontend) {
+    return {
+      isError: true,
+      error:
+        "Person who deployed the app didn't specify spotify a client id or frontend id",
+    };
+  }
   let result: RecommenderResult | null = null;
   const spotifyClient = await SpotifyApi.performUserAuthorization(
     spotifyClientId,
