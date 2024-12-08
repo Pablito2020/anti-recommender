@@ -4,7 +4,6 @@
   ];
   perSystem = _: {
     pre-commit = {
-      check.enable = true;
       settings = {
         hooks = {
           treefmt = {

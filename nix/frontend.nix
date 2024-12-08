@@ -68,7 +68,7 @@
       };
     };
     pre-commit = {
-      check.enable = true;
+      check.enable = false; # We're working with the current directory path
       settings = {
         hooks = {
           eslint = {
@@ -76,6 +76,7 @@
             pass_filenames = false;
             entry = "${self.packages.${system}.frontend}/lib/node_modules/.bin/eslint -c frontend/eslint.config.js frontend";
             settings.extensions = "\\.(js|ts|jsx|tsx|md|mdx|cjs|ts)$";
+            verbose = true;
           };
         };
       };
