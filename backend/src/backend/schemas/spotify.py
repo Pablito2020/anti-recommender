@@ -1,17 +1,17 @@
-from typing import List, Optional, Dict
-from pydantic import BaseModel, HttpUrl
+from typing import List, Optional
+from pydantic import BaseModel
 
 class ExternalUrls(BaseModel):
-    spotify: HttpUrl
+    spotify: str
 
 class Image(BaseModel):
     height: int
-    url: HttpUrl
+    url: str
     width: int
 
 class Artist(BaseModel):
     external_urls: ExternalUrls
-    href: HttpUrl
+    href: str
     id: str
     name: str
     type: str
@@ -22,7 +22,7 @@ class Album(BaseModel):
     artists: List[Artist]
     available_markets: List[str]
     external_urls: ExternalUrls
-    href: HttpUrl
+    href: str
     id: str
     images: List[Image]
     name: str
@@ -44,12 +44,12 @@ class Track(BaseModel):
     explicit: bool
     external_ids: ExternalIds
     external_urls: ExternalUrls
-    href: HttpUrl
+    href: str
     id: str
     is_local: bool
     name: str
     popularity: int
-    preview_url: Optional[HttpUrl]
+    preview_url: Optional[str]
     track_number: int
     type: str
     uri: str
@@ -65,7 +65,7 @@ class Cursors(BaseModel):
 
 class RecentlyPlayed(BaseModel):
     items: List[PlayedItem]
-    next: Optional[HttpUrl]
+    next: Optional[str]
     cursors: Cursors
     limit: int
-    href: HttpUrl
+    href: str

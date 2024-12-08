@@ -1,13 +1,14 @@
-from pydantic import BaseModel, HttpUrl
 from typing import List, Optional
+
+from pydantic import BaseModel
 
 
 class Song(BaseModel):
     name: str
-    image: Optional[HttpUrl]
+    image: Optional[str]
+
 
 class RecommendedSong(BaseModel):
     isRandom: bool
-    fromSongs: Optional[List[Song]]
+    fromSongs: List[Song]
     recommended: Song
-

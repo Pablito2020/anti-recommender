@@ -1,9 +1,11 @@
+from asyncio import sleep
+
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from src.backend.schemas.auth import UserToken
-from .schemas.recommend import RecommendedSong, Song
-from .services.spotify import SpotifyService
+from src.backend.schemas.recommend import RecommendedSong
+from src.backend.services.spotify import SpotifyService
 
 app = FastAPI(
     title="AntiRecommender API",
@@ -33,12 +35,8 @@ def root():
 def recommend_songs_for_user_with_token(data: UserToken) -> RecommendedSong:
     spotify = SpotifyService(access_token=data.access_token)
     songs = spotify.recently_played
-    song = songs[0]
     return RecommendedSong(
         isRandom=True,
-        fromSongs=[],
-        recommended=Song(
-           name=song.name,
-           image=None
-        )
+        fromSongs=songs,
+        recommended=songs[0]
     )
