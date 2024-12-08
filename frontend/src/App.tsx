@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./App.css";
 import Recommendations from "./components/recommendations.tsx";
-import { Box, Button, SvgIcon, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import AntiRecommender from "/antirecommender.svg";
 
 function App() {
