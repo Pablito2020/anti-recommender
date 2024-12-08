@@ -1,6 +1,7 @@
 {inputs, ...}: {
   imports = [
     inputs.treefmt-nix.flakeModule
+    inputs.pre-commit-hooks.flakeModule
   ];
   perSystem = {pkgs, ...}: let
     inherit (inputs.nixpkgs) lib;
@@ -30,6 +31,7 @@
       "${venv}/bin/mypy"
     '';
   in {
+    # nix build .#backend generates a docker image
     packages.backend = pkgs.dockerTools.buildLayeredImage {
       name = "backend-antirecommender";
       contents = [pkgs.cacert];
@@ -40,6 +42,10 @@
         ];
       };
     };
+    # When we do nix run .#backend, execute the server
+    apps.backend.program = "${pkgs.lib.getExe start}";
+
+    # Linters, mypy checking, etc.
     treefmt.config.programs = {
       mypy = {
         enable = true;
@@ -50,7 +56,20 @@
           ];
         };
       };
+      ruff-check.enable = true;
+      ruff-format.enable = true;
     };
-    apps.backend.program = "${pkgs.lib.getExe start}";
+
+    # Enable pre-commit hook of the treefmt declared before
+    pre-commit = {
+      settings = {
+        hooks = {
+          treefmt = {
+            enable = true;
+            pass_filenames = false;
+          };
+        };
+      };
+    };
   };
 }

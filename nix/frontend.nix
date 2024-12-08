@@ -4,6 +4,7 @@
   ...
 }: {
   imports = [
+    inputs.treefmt-nix.flakeModule
     inputs.pre-commit-hooks.flakeModule
   ];
   perSystem = {
@@ -45,6 +46,7 @@
     server = pkgs.writeShellScriptBin "server-frontend" "${pkgs.caddy}/bin/caddy file-server --listen localhost:5173 --root ${staticFiles}";
     program = pkgs.lib.getExe server;
   in {
+    # nix build .#frontend generates the static files
     packages.frontend = inputs.dream2nix.lib.evalModules {
       packageSets.nixpkgs = inputs.nixpkgs.legacyPackages.${system};
       modules = [
@@ -54,6 +56,8 @@
         }
       ];
     };
+
+    # nix build .#frontend-docker builds a docker image with caddy
     packages.frontend-docker = pkgs.dockerTools.buildLayeredImage {
       name = "frontend-antirecommender";
       config = {
@@ -67,8 +71,10 @@
         ];
       };
     };
+
+    # Enable pre-commit hooks (eslint and prettier in treefmt)
     pre-commit = {
-      check.enable = false; # We're working with the current directory path
+      check.enable = false; # We're working with the current directory path, gives an error when building on nix sandbox
       settings = {
         hooks = {
           eslint = {
@@ -78,9 +84,16 @@
             settings.extensions = "\\.(js|ts|jsx|tsx|md|mdx|cjs|ts)$";
             verbose = true;
           };
+          treefmt = {
+            enable = true;
+            pass_filenames = false;
+          };
         };
       };
     };
+    treefmt.config.programs.prettier.enable = true;
+
+    # nix run .#frontend executes a dummy server with the static files generated
     apps.frontend.program = program;
   };
 }
