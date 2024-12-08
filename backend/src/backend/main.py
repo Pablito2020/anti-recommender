@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from src.backend.schemas.auth import UserToken
-from src.backend.schemas.recommend import RecommendedSong
-from src.backend.services.spotify import SpotifyService
+from backend.schemas.auth import UserToken
+from backend.schemas.recommend import RecommendedSong
+from backend.services.spotify import SpotifyService
 
 app = FastAPI(
     title="AntiRecommender API",

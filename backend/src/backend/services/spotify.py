@@ -3,8 +3,8 @@ from typing import List
 from spotipy import Spotify, SpotifyException
 from starlette.exceptions import HTTPException
 
-from src.backend.schemas.recommend import Song
-from src.backend.schemas.spotify import RecentlyPlayed
+from backend.schemas.recommend import Song
+from backend.schemas.spotify import RecentlyPlayed
 
 
 class SpotifyService:

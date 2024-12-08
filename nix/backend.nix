@@ -40,6 +40,10 @@
         Cmd = [
           "${venv}/bin/uvicorn"
           asgiApp
+          "--host"
+          "0.0.0.0"
+          "--port"
+          "8000"
         ];
       };
     };
