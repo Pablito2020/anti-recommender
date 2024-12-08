@@ -60,6 +60,7 @@
     # nix build .#frontend-docker builds a docker image with caddy
     packages.frontend-docker = pkgs.dockerTools.buildLayeredImage {
       name = "frontend-antirecommender";
+      tag = "latest";
       config = {
         Cmd = [
           "${pkgs.caddy}/bin/caddy"

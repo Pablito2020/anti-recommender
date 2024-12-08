@@ -34,6 +34,7 @@
     # nix build .#backend generates a docker image
     packages.backend = pkgs.dockerTools.buildLayeredImage {
       name = "backend-antirecommender";
+      tag = "latest";
       contents = [pkgs.cacert];
       config = {
         Cmd = [
