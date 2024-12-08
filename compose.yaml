@@ -1,0 +1,10 @@
+services:
+  backend:
+    image: ghcr.io/pablito2020/backend-antirecommender:latest
+    ports:
+      - "8000:8000"
+
+  frontend:
+    image: ghcr.io/pablito2020/frontend-antirecommender:latest
+    ports:
+      - "5173:5173"
