@@ -58,6 +58,13 @@ const getApiRecommendation: (
   }
 };
 
+export const userIsLoggedIn: () => Promise<boolean> = async () => {
+  const token = await localStorage.getItem(
+    "spotify-sdk:AuthorizationCodeWithPKCEStrategy:token",
+  );
+  return token != undefined;
+};
+
 export const getRecommendations: () => Promise<
   Result<Recommender>
 > = async () => {

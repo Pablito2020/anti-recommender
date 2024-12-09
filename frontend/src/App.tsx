@@ -1,17 +1,26 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import Recommendations from "./components/recommendations.tsx";
 import { Box, Button, Typography } from "@mui/material";
 import AntiRecommender from "/antirecommender.svg";
+import { userIsLoggedIn } from "./services/recommender.ts";
 
 function App() {
   const [isInfering, setInfering] = useState<boolean>(false);
+  const [isLoggedIn, setLogin] = useState<boolean>(false);
   const onBack = () => {
     setInfering(false);
   };
   const goInfer = () => {
     setInfering(true);
   };
+  useEffect(() => {
+    const setLoggedInInfo = async () => {
+      const logged = await userIsLoggedIn();
+      setLogin(logged);
+    };
+    setLoggedInInfo();
+  }, []);
 
   if (isInfering) {
     return (
@@ -35,6 +44,7 @@ function App() {
       marginBottom: "20px",
     },
   };
+  const buttonText = isLoggedIn ? "Start!" : "Log In";
   return (
     <Box
       sx={{
@@ -56,7 +66,7 @@ function App() {
         size="large"
         onClick={goInfer}
       >
-        Yes!
+        {buttonText}
       </Button>
     </Box>
   );
