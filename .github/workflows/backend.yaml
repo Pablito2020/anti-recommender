@@ -36,9 +36,11 @@ jobs:
         uses: cachix/install-nix-action@v27
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: DeterminateSystems/magic-nix-cache-action@main
       - name: Build image and deploy
+        run: nix build .#backend
+      - name: Deploy the image to github registry
         run: |
-          nix build .#backend
           docker load < result
           docker tag backend-antirecommender:latest ghcr.io/pablito2020/backend-antirecommender:latest
           docker push ghcr.io/pablito2020/backend-antirecommender:latest
