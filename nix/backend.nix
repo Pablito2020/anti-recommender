@@ -6,12 +6,12 @@
   perSystem = {pkgs, ...}: let
     inherit (inputs.nixpkgs) lib;
     backendPath = ./../backend;
-    asgiApp = "backend.main:app";
+    # Python Env
+    python = pkgs.python313;
     workspace = inputs.uv2nix.lib.workspace.loadWorkspace {workspaceRoot = backendPath;};
     overlay = workspace.mkPyprojectOverlay {
       sourcePreference = "wheel";
     };
-    python = pkgs.python313;
     baseSet = pkgs.callPackage inputs.pyproject-nix.build.packages {
       inherit python;
     };
@@ -22,13 +22,23 @@
       ]
     );
     venv = pythonSet.mkVirtualEnv "backend" workspace.deps.default;
-    start = pkgs.writeShellScriptBin "server" ''
-      cd ${backendPath}
-      ${venv}/bin/uvicorn ${asgiApp}
-    '';
 
+    # mypy
     mypy = pkgs.writeShellScriptBin "mypy" ''
       "${venv}/bin/mypy"
+    '';
+
+    # ASGI app
+    asgiServer = "${venv}/bin/uvicorn";
+    asgiApp = "backend.main:app";
+    options = pkgs.lib.cli.toGNUCommandLine {} {
+      host = "0.0.0.0";
+      port = 8000;
+    };
+    executeServerCommand = "${asgiServer} ${asgiApp} ${pkgs.lib.strings.concatStringsSep " " options}";
+    start = pkgs.writeShellScriptBin "server" ''
+      cd ${backendPath}
+      ${executeServerCommand}
     '';
   in {
     # nix build .#backend generates a docker image
@@ -37,14 +47,12 @@
       tag = "latest";
       contents = [pkgs.cacert];
       config = {
-        Cmd = [
-          "${venv}/bin/uvicorn"
-          asgiApp
-          "--host"
-          "0.0.0.0"
-          "--port"
-          "8000"
-        ];
+        Cmd =
+          [
+            asgiServer
+            asgiApp
+          ]
+          ++ options;
       };
     };
     # When we do nix run .#backend, execute the server
