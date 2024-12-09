@@ -59,10 +59,11 @@ const getApiRecommendation: (
 };
 
 export const userIsLoggedIn: () => Promise<boolean> = async () => {
-  const token = await localStorage.getItem(
+  const token = localStorage.getItem(
     "spotify-sdk:AuthorizationCodeWithPKCEStrategy:token",
   );
-  return token != undefined;
+  const verifier = localStorage.getItem("spotify-sdk:verifier");
+  return token != undefined || verifier != undefined;
 };
 
 export const getRecommendations: () => Promise<
