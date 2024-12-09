@@ -10,13 +10,13 @@ import {
   Button,
 } from "@mui/material";
 import { Recommender } from "../schema/recommender.ts";
-import vite from "/vite.svg";
 
 interface SpotifyRecommenderProps {
   onBack: () => void;
 }
 
-const defaultImage = vite;
+const defaultImage =
+  "https://www.pngmart.com/files/8/Compact-Disk-PNG-HD-Photo.png";
 
 function SpotifyRecommendations({ onBack }: SpotifyRecommenderProps) {
   const [error, setError] = useState<string | null>(null);
