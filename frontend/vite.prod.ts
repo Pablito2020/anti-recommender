@@ -5,5 +5,5 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react()],
   publicDir: "prod",
-  base: "https://pablito2020.github.io/anti-recommender/",
+  base: "https://menea.mispelotas.com",
 });
