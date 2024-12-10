@@ -10,6 +10,7 @@
   perSystem = {
     system,
     pkgs,
+    config,
     ...
   }: let
     paths = {
@@ -122,6 +123,9 @@
       };
     };
     treefmt.config.programs.prettier.enable = true;
+
+    # Add nodejs version and pre-commit to our devshell
+    devshells.default.packages = [pkgs.nodejs];
 
     # nix run .#frontend executes a dummy server with the static files generated
     apps.frontend.program = program;

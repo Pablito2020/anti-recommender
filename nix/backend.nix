@@ -3,7 +3,11 @@
     inputs.treefmt-nix.flakeModule
     inputs.pre-commit-hooks.flakeModule
   ];
-  perSystem = {pkgs, ...}: let
+  perSystem = {
+    pkgs,
+    config,
+    ...
+  }: let
     inherit (inputs.nixpkgs) lib;
     backendPath = ./../backend;
     # Python Env
@@ -84,5 +88,9 @@
         };
       };
     };
+
+    # Add this virtualenv inside the devshell, so we can access pyhton with the dependencies
+    # we installed like it's just our "normal" python installation package
+    devshells.default.packages = [venv];
   };
 }

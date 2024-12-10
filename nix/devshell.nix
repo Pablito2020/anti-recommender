@@ -10,11 +10,8 @@
     devshells.default = {
       packages = [
         config.treefmt.build.wrapper
-        pkgs.nodejs
         pkgs.git
         pkgs.git-crypt
-        pkgs.python313
-        pkgs.uv
       ];
       devshell.startup.pre-commit.text = config.pre-commit.installationScript;
       commands = [
