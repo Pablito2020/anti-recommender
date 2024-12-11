@@ -10,6 +10,7 @@ dependencies = [
     "numpy>=2.2.0",
     "pandas>=2.2.3",
     "spotipy>=2.24.0",
+    "types-requests>=2.32.0.20241016",
     "uvicorn>=0.32.1",
 ]
 

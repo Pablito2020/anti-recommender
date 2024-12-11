@@ -3,7 +3,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from backend.schemas.auth import UserToken
 from backend.schemas.recommend import RecommendedSong
-from backend.services.spotify import SpotifyService
+from backend.services.spotify.client import SpotifyClient
 
 app = FastAPI(
     title="AntiRecommender API",
@@ -35,6 +35,6 @@ def root() -> str:
     status_code=200,
 )
 def recommend_songs_for_user_with_token(data: UserToken) -> RecommendedSong:
-    spotify = SpotifyService(access_token=data.access_token)
+    spotify = SpotifyClient(access_token=data.access_token)
     songs = spotify.recently_played
     return RecommendedSong(isRandom=True, fromSongs=songs, recommended=songs[0])

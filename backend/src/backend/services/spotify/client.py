@@ -7,7 +7,7 @@ from backend.schemas.recommend import Song
 from backend.schemas.spotify import RecentlyPlayed
 
 
-class SpotifyService:
+class SpotifyClient:
     def __init__(self, access_token: str):
         try:
             self.sp = Spotify(auth=access_token)
