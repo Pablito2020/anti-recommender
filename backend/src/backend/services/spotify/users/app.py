@@ -69,4 +69,4 @@ class SpotifyApp:
         user = list(filter(lambda usr: usr.mail == mail, users.success))
         if user:
             return SpotifyApp._found_user(user)
-        self._create_user_from_mail(mail)
+        return self._create_user_from_mail(mail)

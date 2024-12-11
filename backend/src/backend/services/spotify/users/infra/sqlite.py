@@ -21,7 +21,6 @@ from backend.services.spotify.users.infra.spotify_token import (
 )
 from backend.services.spotify.users.infra.spotify_user import SpotifyUser
 
-SQLITE_PATH_ENV = "SQLITE_PATH"
 INITIAL_TOKEN_ENV = "INITIAL_TOKEN"
 
 
@@ -39,7 +38,7 @@ class SqliteSpotifyRepository(TokenRepository, UserRepository):  # type: ignore
     spotify_user: SpotifyUser = field(init=False)
 
     def __post_init__(self) -> None:
-        self.connection = sqlite3.connect(self.sqlite_path)
+        self.connection = sqlite3.connect(self.sqlite_path, check_same_thread=False)
         self._ensure_user_table()
         self.spotify_token = SpotifyTokenService(
             user_id=self.user_id, token=self._ensure_token()
@@ -62,7 +61,7 @@ class SqliteSpotifyRepository(TokenRepository, UserRepository):  # type: ignore
     def _ensure_token(self) -> Token:
         self._ensure_token_database()
         token_from_db = self._get_token_from_db()
-        if not token_from_db:
+        if token_from_db is None:
             initial_token = self._get_initial_token_from_env_vars()
             result_saving = self._add_token_to_db(initial_token)
             if result_saving.is_error:
@@ -166,7 +165,7 @@ class SqliteSpotifyRepository(TokenRepository, UserRepository):  # type: ignore
                 ]
             )
         except sqlite3.Error as e:
-            return Result(Error(message=str(e)))
+            return Result(error=Error(message=str(e)))
 
     def refresh_token(self) -> Result[Token, Error]:
         refreshed_token_result = self.spotify_token.refresh_token()
@@ -201,6 +200,7 @@ class SqliteSpotifyRepository(TokenRepository, UserRepository):  # type: ignore
                 ),
             )
             self.connection.commit()
+            return Result(success=token)
         except sqlite3.IntegrityError as e:
             return Result(error=Error(f"Token already exists: {e}"))
         except sqlite3.Error as e:

@@ -1,5 +1,4 @@
 import time
-from dataclasses import dataclass
 from typing import List, Dict
 
 import requests
@@ -9,7 +8,6 @@ from backend.common.result import Result, Error
 from backend.services.spotify.users.domain import Token, UserRepository, Mail, User
 
 
-@dataclass
 class SpotifyUser(BaseModel, UserRepository):  # type: ignore
     app_id: str
 
@@ -25,7 +23,7 @@ class SpotifyUser(BaseModel, UserRepository):  # type: ignore
             self.endpoint, json=data, headers=self._headers_from_token(token)
         )
         if response.status_code == 200:
-            return User(mail=mail, creation_date=time.time())
+            return Result(success=User(mail=mail, creation_date=time.time()))
         # TODO: Check for more code errors here!
         return Result(
             error=Error(

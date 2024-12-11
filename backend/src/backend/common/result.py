@@ -18,7 +18,7 @@ class Result(Generic[T, E]):
 
     @property
     def is_error(self) -> bool:
-        return self.error is None
+        return self.error is not None
 
 
 @dataclass(frozen=True)
