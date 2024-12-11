@@ -1,9 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException
 from starlette.middleware.cors import CORSMiddleware
 
-from backend.schemas.auth import UserToken
+from backend.schemas.auth import UserToken, MailPetition
 from backend.schemas.recommend import RecommendedSong
 from backend.services.spotify.client import SpotifyClient
+from backend.services.spotify.users.app import SpotifyApp
+from backend.services.spotify.users.dependencies import get_spotify_app
 
 app = FastAPI(
     title="AntiRecommender API",
@@ -27,6 +29,19 @@ app.add_middleware(
 @app.get("/")
 def root() -> str:
     return "Hello world!"
+
+
+@app.post(
+    path="/user",
+    status_code=200,
+)
+def add_user_to_spotify_project(
+    data: MailPetition, spotify_app: SpotifyApp = Depends(get_spotify_app)
+) -> str:
+    result = spotify_app.add_user(data.mail)
+    if result.is_error:
+        raise HTTPException(status_code=404, detail=result.error.message)
+    return "ok"
 
 
 @app.post(

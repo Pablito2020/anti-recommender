@@ -8,3 +8,7 @@ class UserToken(BaseModel):
     refresh_token: str
     scope: str
     token_type: str
+
+
+class MailPetition(BaseModel):
+    mail: str

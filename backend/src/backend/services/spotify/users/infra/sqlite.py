@@ -33,27 +33,18 @@ class SqliteSpotifyRepository(TokenRepository, UserRepository):  # type: ignore
 
     app_id: str
     user_id: str
-    sqlite_path: str | None = None
+    sqlite_path: str
     connection: sqlite3.Connection = field(init=False)
     spotify_token: SpotifyTokenService = field(init=False)
     spotify_user: SpotifyUser = field(init=False)
 
     def __post_init__(self) -> None:
-        self._ensure_sqlite_connection()
+        self.connection = sqlite3.connect(self.sqlite_path)
         self._ensure_user_table()
         self.spotify_token = SpotifyTokenService(
             user_id=self.user_id, token=self._ensure_token()
         )
         self.spotify_user = SpotifyUser(app_id=self.app_id)
-
-    def _ensure_sqlite_connection(self) -> None:
-        if self.sqlite_path is None:
-            self.sqlite_path = os.environ.get(SQLITE_PATH_ENV)
-        if self.sqlite_path is None:
-            raise ValueError(
-                f"SQLite path can't be null! Please set the env variable: {SQLITE_PATH_ENV}"
-            )
-        self.connection = sqlite3.connect(self.sqlite_path)
 
     def _ensure_user_table(self) -> None:
         try:
