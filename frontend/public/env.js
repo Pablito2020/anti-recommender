@@ -1,5 +1,5 @@
 window.env = {
-  SPOTIFY_CLIENT_ID: "f3d641d567484158967a7832a6b8d418",
+  SPOTIFY_CLIENT_ID: "8bf6dec81ea94e56bae1a88aee83f183",
   FRONTEND_URL: "http://localhost:5173",
   BACKEND_URL: "http://localhost:8000",
 };
