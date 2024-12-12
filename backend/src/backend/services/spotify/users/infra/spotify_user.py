@@ -18,18 +18,26 @@ class SpotifyUser(BaseModel, UserRepository):  # type: ignore
         return Result.failure(Error("TODO: Implement delete users"))
 
     def add_user(self, mail: Mail, token: Token) -> Result[User, Error]:
-        data = {"clientId": self.app_id, "email": mail.address, "name": mail.address}
-        response = requests.post(
-            self.endpoint, json=data, headers=self._headers_from_token(token)
-        )
-        if response.status_code == 200:
-            return Result.success(User(mail=mail, creation_date=time.time()))
-        # TODO: Check for more code errors here!
-        return Result.failure(
-            Error(
-                f"Couldn't add user to the whitelist of the app with id: {self.app_id}. Status Code: {response.status_code}. Content: {response.content.decode()}"
+        try:
+            data = {
+                "clientId": self.app_id,
+                "email": mail.address,
+                "name": mail.address,
+            }
+            response = requests.post(
+                self.endpoint, json=data, headers=self._headers_from_token(token)
             )
-        )
+            if response.status_code == 200:
+                return Result.success(User(mail=mail, creation_date=time.time()))
+            return Result.failure(
+                Error(
+                    f"Couldn't add user to the whitelist of the app with id: {self.app_id}. Status Code: {response.status_code}. Content: {response.content.decode()}"
+                )
+            )
+        except Exception as e:
+            return Result.failure(
+                Error(f"We couldn't add user via spotify api reverse hack: {e}")
+            )
 
     @property
     def endpoint(self) -> str:
