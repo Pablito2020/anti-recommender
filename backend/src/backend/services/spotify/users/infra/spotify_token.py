@@ -20,7 +20,7 @@ class SpotifyToken(TokenRepository):  # type: ignore
     token: Token
 
     def get_token(self) -> Result[Token, Error]:
-        return Result(success=self.token)
+        return Result.success(self.token)
 
     def refresh_token(self) -> Result[Token, Error]:
         # TODO: Check for a lot of errors here!
@@ -36,4 +36,4 @@ class SpotifyToken(TokenRepository):  # type: ignore
         token_info["expires_at"] = int(time.time()) + token_info["expires_in"]
         new_token = Token(**token_info)
         self.token = new_token
-        return Result(success=new_token)
+        return Result.success(new_token)

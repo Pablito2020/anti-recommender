@@ -7,6 +7,7 @@ from backend.services.spotify.client import SpotifyClient
 from backend.services.spotify.users.app import SpotifyApp
 from backend.services.spotify.users.dependencies import get_spotify_app
 
+
 app = FastAPI(
     title="AntiRecommender API",
     description="Recommend you different songs",

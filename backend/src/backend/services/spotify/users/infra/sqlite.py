@@ -66,12 +66,12 @@ class SqliteSpotifyRepository(TokenRepository, UserRepository):  # type: ignore
             result_saving = self._add_token_to_db(initial_token)
             if result_saving.is_error:
                 raise ValueError("Error saving initial token to sqlite database")
-            return result_saving.success
+            return result_saving.success_value
         if token_from_db.is_error:
             raise ValueError(
-                f"Couldn't initialize sqlite repository because initial token fetching says: {token_from_db.error}"
+                f"Couldn't initialize sqlite repository because initial token fetching says: {token_from_db.error_value}"
             )
-        return token_from_db.success
+        return token_from_db.success_value
 
     def _ensure_token_database(self) -> None:
         try:
@@ -118,7 +118,7 @@ class SqliteSpotifyRepository(TokenRepository, UserRepository):  # type: ignore
         result = self.spotify_user.delete_user(mail, token)
         if result.is_error:
             return result
-        return self._delete_user_from_db(result.success)
+        return self._delete_user_from_db(result.success_value)
 
     def _delete_user_from_db(self, user: User) -> Result[User, Error]:
         try:
@@ -127,17 +127,17 @@ class SqliteSpotifyRepository(TokenRepository, UserRepository):  # type: ignore
             self.connection.commit()
 
             if cursor.rowcount == 0:
-                return Result(Error(message="User not found"))
+                return Result.failure(Error(message="User not found"))
 
-            return Result(success=None)
+            return Result.success(None)
         except sqlite3.Error as e:
-            return Result(Error(message=str(e)))
+            return Result.failure(Error(message=str(e)))
 
     def add_user(self, mail: Mail, token: Token) -> Result[User, Error]:
         result = self.spotify_user.add_user(mail, token)
         if result.is_error:
             return result
-        return self._add_user_to_db(result.success)
+        return self._add_user_to_db(result.success_value)
 
     def _add_user_to_db(self, user: User) -> Result[User, Error]:
         try:
@@ -147,37 +147,34 @@ class SqliteSpotifyRepository(TokenRepository, UserRepository):  # type: ignore
                 (user.mail.address, user.creation_date),
             )
             self.connection.commit()
-            return Result(success=user)
+            return Result.success(user)
         except sqlite3.IntegrityError:
-            return Result(Error(message="User already exists"))
+            return Result.failure(Error(message="User already exists"))
         except sqlite3.Error as e:
-            return Result(Error(message=str(e)))
+            return Result.failure(Error(message=str(e)))
 
     def users(self) -> Result[List[User], Error]:
         try:
             cursor = self.connection.cursor()
             cursor.execute("SELECT mail, creation_date FROM users")
             rows = cursor.fetchall()
-            return Result(
-                success=[
-                    User(mail=Mail(address=row[0]), creation_date=row[1])
-                    for row in rows
-                ]
+            return Result.success(
+                [User(mail=Mail(address=row[0]), creation_date=row[1]) for row in rows]
             )
         except sqlite3.Error as e:
-            return Result(error=Error(message=str(e)))
+            return Result.failure(Error(message=str(e)))
 
     def refresh_token(self) -> Result[Token, Error]:
         refreshed_token_result = self.spotify_token.refresh_token()
         if refreshed_token_result.is_error:
             return refreshed_token_result
-        return self._add_token_to_db(refreshed_token_result.success)
+        return self._add_token_to_db(refreshed_token_result.success_value)
 
     def get_token(self) -> Result[Token, Error]:
         if res := self._get_token_from_db():
             return res
-        return Result(
-            error=Error("Impossible error on backend, we should allways have a token!")
+        return Result.failure(
+            Error("Impossible error on backend, we should always have a token!")
         )
 
     def _add_token_to_db(self, token: Token) -> Result[Token, Error]:
@@ -200,11 +197,11 @@ class SqliteSpotifyRepository(TokenRepository, UserRepository):  # type: ignore
                 ),
             )
             self.connection.commit()
-            return Result(success=token)
+            return Result.success(token)
         except sqlite3.IntegrityError as e:
-            return Result(error=Error(f"Token already exists: {e}"))
+            return Result.failure(Error(f"Token already exists: {e}"))
         except sqlite3.Error as e:
-            return Result(error=Error(f"Error saving token inside sqlite: {e}"))
+            return Result.failure(Error(f"Error saving token inside sqlite: {e}"))
 
     def _get_token_from_db(self) -> Result[Token, Error] | None:
         try:
@@ -212,8 +209,8 @@ class SqliteSpotifyRepository(TokenRepository, UserRepository):  # type: ignore
             cursor.execute("SELECT * FROM tokens LIMIT 1")
             row = cursor.fetchone()
             if row:
-                return Result(
-                    success=Token(
+                return Result.success(
+                    Token(
                         access_token=row[0],
                         token_type=row[1],
                         expires_in=row[2],
@@ -225,4 +222,4 @@ class SqliteSpotifyRepository(TokenRepository, UserRepository):  # type: ignore
                 )
             return None
         except sqlite3.Error as e:
-            return Result(error=Error(f"Error retrieving token from sqlite: {e}"))
+            return Result.failure(Error(f"Error retrieving token from sqlite: {e}"))

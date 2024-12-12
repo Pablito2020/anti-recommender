@@ -12,10 +12,10 @@ class SpotifyUser(BaseModel, UserRepository):  # type: ignore
     app_id: str
 
     def users(self) -> Result[List[User], Error]:
-        return Result(error=Error("TODO: Implement get users"))
+        return Result.failure(Error("TODO: Implement get users"))
 
     def delete_user(self, mail: Mail, token: Token) -> Result[User, Error]:
-        return Result(error=Error("TODO: implement delete user"))
+        return Result.failure(Error("TODO: Implement delete users"))
 
     def add_user(self, mail: Mail, token: Token) -> Result[User, Error]:
         data = {"clientId": self.app_id, "email": mail.address, "name": mail.address}
@@ -23,10 +23,10 @@ class SpotifyUser(BaseModel, UserRepository):  # type: ignore
             self.endpoint, json=data, headers=self._headers_from_token(token)
         )
         if response.status_code == 200:
-            return Result(success=User(mail=mail, creation_date=time.time()))
+            return Result.success(User(mail=mail, creation_date=time.time()))
         # TODO: Check for more code errors here!
-        return Result(
-            error=Error(
+        return Result.failure(
+            Error(
                 f"Couldn't add user to the whitelist of the app with id: {self.app_id}. Status Code: {response.status_code}. Content: {response.content.decode()}"
             )
         )

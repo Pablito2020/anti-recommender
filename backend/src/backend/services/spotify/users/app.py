@@ -33,9 +33,11 @@ class SpotifyApp:
     @staticmethod
     def _found_user(user: List[User]) -> Result[User, Error]:
         if len(user) == 1:
-            return Result(success=user[0])
-        return Result(
-            error=Error(message=f"Your user is {len(user)} in our database...")
+            return Result.success(user[0])
+        return Result.failure(
+            Error(
+                message=f"We have {len(user)} of your user in our database. Should be impossible"
+            )
         )
 
     def _is_token_expired(self, token: Token) -> bool:
@@ -47,26 +49,26 @@ class SpotifyApp:
         result_token = self.tokens.get_token()
         if result_token.is_error:
             return result_token
-        token: Token = result_token.success
+        token = result_token.success_value
         if not self._is_token_expired(token):
             return self.users.add_user(mail=mail, token=token)
         new_token_result = self.tokens.refresh_token()
         if new_token_result.is_error:
             return new_token_result
-        return self.users.add_user(mail=mail, token=new_token_result.success)
+        return self.users.add_user(mail=mail, token=new_token_result.success_value)
 
     def _create_user_from_mail(self, mail: str) -> Result[User, Error]:
         try:
             mail = Mail(address=mail)
             return self._create_user(mail)
         except ValidationError:
-            return Result(error=Error(message="Your mail is incorrect"))
+            return Result.failure(Error(message="Your mail is incorrect"))
 
     def add_user(self, mail: str) -> Result[User, Error]:
         users = self.users.users()
         if users.is_error:
-            return Result(error=users.error)
-        user = list(filter(lambda usr: usr.mail == mail, users.success))
+            return Result.failure(users.error_value)
+        user = list(filter(lambda usr: usr.mail == mail, users.success_value))
         if user:
             return SpotifyApp._found_user(user)
         return self._create_user_from_mail(mail)
