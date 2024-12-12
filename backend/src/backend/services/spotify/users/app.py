@@ -57,19 +57,23 @@ class SpotifyApp:
             return new_token_result
         return self.users.add_user(mail=mail, token=new_token_result.success_value)
 
-    def _create_user_from_mail(self, mail: str) -> Result[User, Error]:
+    @staticmethod
+    def _get_mail(mail: str) -> Result[Mail, Error]:
         try:
-            mail = Mail(address=mail)
-            return self._create_user(mail)
+            return Result.success(Mail(address=mail))
         except ValidationError:
             return Result.failure(Error(message="Your mail is incorrect"))
 
     def add_user(self, mail: str) -> Result[User, Error]:
+        result_mail = SpotifyApp._get_mail(mail)
+        if result_mail.is_error:
+            return result_mail
+        _mail = result_mail.success_value
         users = self.users.users()
         if users.is_error:
             return Result.failure(users.error_value)
         user_list: List[User] = users.success_value
-        user = list(filter(lambda usr: usr.mail.address == mail, user_list))
+        user = list(filter(lambda usr: usr.mail == _mail, user_list))
         if user:
             return SpotifyApp._found_user(user)
-        return self._create_user_from_mail(mail)
+        return self._create_user(_mail)

@@ -117,3 +117,11 @@ def test_if_token_is_invalidated_refresh_it_and_we_get_correct_we_add_user():
     user = app.add_user("nonadded@test.com")
     assert not user.is_error
     assert user.success_value == new_user
+
+
+def test_if_mail_is_invalid_return_error():
+    user_repo: UserRepository = MagicMock()
+    token_repository: TokenRepository = MagicMock()
+    app = SpotifyApp(users=user_repo, tokens=token_repository)
+    user = app.add_user("notamail")
+    assert user.is_error, "We shouldn't have an user error"
