@@ -41,7 +41,7 @@ def add_user_to_spotify_project(
 ) -> str:
     result = spotify_app.add_user(data.mail)
     if result.is_error:
-        raise HTTPException(status_code=404, detail=result.error.message)
+        raise HTTPException(status_code=404, detail=result.error_value.message)
     return "ok"
 
 
