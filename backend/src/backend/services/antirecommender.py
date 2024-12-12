@@ -1,25 +1,29 @@
-from typing import List, Optional, Tuple
+from typing import List, Tuple, Any, Optional
 import pandas as pd
 import numpy as np
-from numpy.typing import NDArray
+from sklearn.cluster import KMeans
+from scipy.spatial.distance import cdist
 
 
 class AntiRecommenderService:
     _instance: Optional["AntiRecommenderService"] = None
-    _data: Optional[pd.DataFrame] = None
-    data_path: Optional[str] = None
+    _data: pd.DataFrame = None
+    _clusters: Optional[np.ndarray[Any, np.dtype[np.float64]]] = None
+    data_path: str = ""
+    num_clusters: int = 10
 
-    def __new__(cls, data_path: str) -> "AntiRecommenderService":
+    def __new__(
+        cls, data_path: str, num_clusters: int = 10
+    ) -> "AntiRecommenderService":
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance.data_path = data_path
+            cls._instance.num_clusters = num_clusters
         return cls._instance
 
     @property
     def data(self) -> pd.DataFrame:
         if self._data is None:
-            if not self.data_path:
-                raise ValueError("Data path must be set before accessing the data.")
             self._data = pd.read_csv(self.data_path)
         return self._data
 
@@ -48,83 +52,100 @@ class AntiRecommenderService:
 
     def _calculate_profiles(
         self, user_track_ids: List[str]
-    ) -> Tuple[NDArray[np.float64], NDArray[np.object_]]:
+    ) -> Tuple[
+        np.ndarray[Any, np.dtype[np.float64]], np.ndarray[Any, np.dtype[np.object_]]
+    ]:
         user_tracks = self._get_user_tracks(user_track_ids)
-        numerical_profile: NDArray[np.float64] = (
-            user_tracks[self.numerical_features].mean(axis=0).values
-        )
-        categorical_profile: NDArray[np.object_] = (
+        numerical_profile = user_tracks[self.numerical_features].mean(axis=0).values
+        categorical_profile = (
             user_tracks[self.categorical_features].mode(axis=0).iloc[0].values
         )
         return numerical_profile, categorical_profile
 
-    def _calculate_dissimilarities(
-        self,
-        numerical_profile: NDArray[np.float64],
-        categorical_profile: NDArray[np.object_],
-    ) -> Tuple[NDArray[np.float64], NDArray[np.float64]]:
-        numerical_data: NDArray[np.float64] = self.data[self.numerical_features].values
-        categorical_data: NDArray[np.object_] = self.data[
-            self.categorical_features
-        ].values
-        numerical_dissimilarity: NDArray[np.float64] = np.linalg.norm(
-            numerical_data - numerical_profile, axis=1
-        )
-        categorical_dissimilarity: NDArray[np.float64] = np.sum(
-            categorical_data != categorical_profile, axis=1
-        ) / len(self.categorical_features)
-        return numerical_dissimilarity, categorical_dissimilarity
+    def _initialize_clusters(self) -> None:
+        numerical_data = self.data[self.numerical_features].values
+        kmeans = KMeans(n_clusters=self.num_clusters, random_state=42)
+        self.data["cluster"] = kmeans.fit_predict(numerical_data)
+        self._clusters = kmeans.cluster_centers_
 
-    def _combine_dissimilarities(
+    def _get_cluster_of_tracks(self, track_ids: List[str]) -> int:
+        user_tracks = self._get_user_tracks(track_ids)
+        user_cluster = user_tracks["cluster"].mode().iloc[0]
+        return int(user_cluster)
+
+    def _find_furthest_cluster(self, user_cluster: int) -> int:
+        distances = cdist(
+            [
+                self._clusters[user_cluster]
+                if self._clusters is not None
+                else np.empty((0,))
+            ],
+            self._clusters if self._clusters is not None else np.empty((0, 0)),
+            metric="euclidean",
+        )
+        furthest_cluster = np.argmax(distances)
+        return int(furthest_cluster)
+
+    def _get_most_similar_song_in_cluster(
         self,
-        numerical_dissimilarity: NDArray[np.float64],
-        categorical_dissimilarity: NDArray[np.float64],
+        cluster: int,
+        numerical_profile: np.ndarray[Any, np.dtype[np.float64]],
+        categorical_profile: np.ndarray[Any, np.dtype[np.object_]],
         alpha: float,
-    ) -> NDArray[np.float64]:
-        return alpha * numerical_dissimilarity + (1 - alpha) * categorical_dissimilarity
-
-    def _get_candidate_tracks(
-        self, user_track_ids: List[str], combined_dissimilarity: NDArray[np.float64]
-    ) -> pd.DataFrame:
-        self.data["combined_dissimilarity"] = combined_dissimilarity
-        return self.data[~self.data["track_id"].isin(user_track_ids)]
-
-    def _select_track_id(self, candidates: pd.DataFrame, index: int) -> str:
-        return str(
-            candidates.sort_values("combined_dissimilarity", ascending=False).iloc[
-                index
-            ]["track_id"]
-        )
-
-    def antirecommend(
-        self, user_track_ids: List[str], alpha: float = 0.7, index: int = 245
     ) -> str:
-        """
-        Finds and returns a track ID that is most dissimilar to the provided user track IDs.
+        cluster_songs = self.data[self.data["cluster"] == cluster]
+        numerical_distances = np.linalg.norm(
+            cluster_songs[self.numerical_features].values - numerical_profile, axis=1
+        )
+        categorical_distances = np.sum(
+            cluster_songs[self.categorical_features].values != categorical_profile,
+            axis=1,
+        ) / len(self.categorical_features)
+        combined_distances = (
+            alpha * numerical_distances + (1 - alpha) * categorical_distances
+        )
+        closest_song_index = np.argmin(combined_distances)
+        return str(cluster_songs.iloc[closest_song_index]["track_id"])
 
-        This function calculates the dissimilarity of all tracks in the dataset to a
-        user-defined set of tracks, based on both numerical and categorical features.
-        It then returns the track ID of the track at the specified position in the sorted
-        list of most dissimilar tracks.
+    def antirecommend(self, user_track_ids: List[str], alpha: float = 0.7) -> str:
+        """
+        Finds and returns a track ID that is outside the user's comfort zone but still somewhat similar.
+
+        This function identifies the user's cluster, finds the furthest away cluster, and selects
+        the most similar song in that cluster to the user's profile.
 
         Args:
             user_track_ids (List[str]): A list of track IDs representing the user's preferences.
             alpha (float): A weighting factor for numerical versus categorical dissimilarities.
-                        Defaults to 0.7, giving 70% weight to numerical features.
-            index (int): The position in the sorted list of dissimilar tracks to return.
-                        Defaults to 245.
 
         Returns:
-            str: The track ID of the track at the specified index in the sorted dissimilarity list.
+            str: The track ID of the recommended song.
         """
+        if self._clusters is None:
+            self._initialize_clusters()
+
         numerical_profile, categorical_profile = self._calculate_profiles(
             user_track_ids
         )
-        numerical_dissimilarity, categorical_dissimilarity = (
-            self._calculate_dissimilarities(numerical_profile, categorical_profile)
+        user_cluster = self._get_cluster_of_tracks(user_track_ids)
+        furthest_cluster = self._find_furthest_cluster(user_cluster)
+        return self._get_most_similar_song_in_cluster(
+            furthest_cluster, numerical_profile, categorical_profile, alpha
         )
-        combined_dissimilarity = self._combine_dissimilarities(
-            numerical_dissimilarity, categorical_dissimilarity, alpha
-        )
-        candidates = self._get_candidate_tracks(user_track_ids, combined_dissimilarity)
-        return self._select_track_id(candidates, index)
+
+    def filter_existing_tracks(self, track_ids: List[str]) -> List[str]:
+        """
+        Filters out any track IDs that are not present in the dataset.
+
+        Args:
+            track_ids (List[str]): A list of track IDs to filter.
+
+        Returns:
+            List[str]: A list of track IDs that are present in the dataset.
+
+        """
+        return [
+            track_id
+            for track_id in track_ids
+            if track_id in self.data["track_id"].values
+        ]
