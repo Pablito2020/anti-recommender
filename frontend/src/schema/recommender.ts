@@ -5,6 +5,7 @@ export interface Result<T> {
 }
 
 export interface Song {
+  id: string;
   name: string;
   image?: string;
 }
