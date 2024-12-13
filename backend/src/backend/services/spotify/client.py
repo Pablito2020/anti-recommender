@@ -40,10 +40,15 @@ class SpotifyClient:
             return []
 
     def get_song_from_id(self, song_id: str) -> Song | None:
-        spotify_track = self.sp.track(track_id=song_id)
-        track = Track(**spotify_track)
-        return Song(
-            id=track.id,
-            name=track.name,
-            image=track.album.images[0].url if len(track.album.images) > 0 else None,
-        )
+        try:
+            spotify_track = self.sp.track(track_id=song_id)
+            track = Track(**spotify_track)
+            return Song(
+                id=track.id,
+                name=track.name,
+                image=track.album.images[0].url
+                if len(track.album.images) > 0
+                else None,
+            )
+        except SpotifyException:
+            return None

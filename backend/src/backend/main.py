@@ -62,10 +62,16 @@ def recommend_songs_for_user_with_token(data: UserToken) -> RecommendedSong:
     songs: List[Song] = spotify.recently_played
     songs_ids = [song.id for song in songs]
     real_ids_in_dataset = anti_recommender.filter_existing_tracks(songs_ids)
-    if not real_ids_in_dataset:
-        # TODO: Change to get a random song!
-        return RecommendedSong(isRandom=True, fromSongs=songs, recommended=songs[0])
-    recommended_song_id = anti_recommender.antirecommend(songs_ids)
-    song = spotify.get_song_from_id(song_id=recommended_song_id)
-    from_songs = [song for song in songs if song.id in real_ids_in_dataset]
-    return RecommendedSong(isRandom=False, fromSongs=from_songs, recommended=song)
+    is_random = not real_ids_in_dataset
+    track_id = (
+        anti_recommender.get_random_track()
+        if is_random
+        else anti_recommender.antirecommend(songs_ids)
+    )
+    song = spotify.get_song_from_id(song_id=track_id)
+    if song is None:
+        raise HTTPException(
+            status_code=500,
+            detail=f"We couldn't fetch the song from spotify, but it's id is: {track_id}",
+        )
+    return RecommendedSong(isRandom=is_random, fromSongs=songs, recommended=song)
