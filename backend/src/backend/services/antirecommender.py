@@ -149,3 +149,13 @@ class AntiRecommenderService:
             for track_id in track_ids
             if track_id in self.data["track_id"].values
         ]
+
+    def get_random_track(self) -> str:
+        """
+        Returns a random track ID.
+
+        Returns:
+            str: A random track ID present in the dataset.
+
+        """
+        return str(self.data.sample(n=1)["track_id"].iloc[0])
