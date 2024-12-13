@@ -84,11 +84,11 @@ class SpotifyApp:
         if users.is_error:
             return Result.failure(users.error_value)
         user_list: List[User] = users.success_value
+        user = list(filter(lambda usr: usr.mail.address == mail, user_list))
+        if user:
+            return SpotifyApp._found_user(user)
         if len(user_list) >= self.users_threshold:
             delete_status = self._delete_first_user(user_list)
             if delete_status.is_error:
                 return delete_status
-        user = list(filter(lambda usr: usr.mail == _mail, user_list))
-        if user:
-            return SpotifyApp._found_user(user)
         return self._create_user(_mail)
