@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -21,7 +21,7 @@ function Login({ onBack }: LoginProps) {
   const [nextScreen, setNextScreen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const handleEmailChange = (event: unknown) => {
+  const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);
   };
 
