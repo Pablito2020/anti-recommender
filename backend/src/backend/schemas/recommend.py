@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 
 class Song(BaseModel):
+    id: str
     name: str
     image: Optional[str]
 

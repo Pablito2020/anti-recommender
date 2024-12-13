@@ -25,6 +25,7 @@ class SpotifyClient:
         songs = []
         for played in recently_played.items:
             song = Song(
+                id=played.track.id,
                 name=played.track.name,
                 image=None
                 if len(played.track.album.images) == 0

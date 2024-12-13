@@ -12,6 +12,7 @@ dependencies = [
     "pydantic[email]>=2.10.3",
     "pytest>=8.3.4",
     "python-dotenv>=1.0.1",
+    "scikit-learn>=1.6.0",
     "spotipy>=2.24.0",
     "types-requests>=2.32.0.20241016",
     "uvicorn>=0.32.1",
