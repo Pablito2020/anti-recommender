@@ -63,16 +63,9 @@ def recommend_songs_for_user_with_token(data: UserToken) -> RecommendedSong:
     songs_ids = [song.id for song in songs]
     real_ids_in_dataset = anti_recommender.filter_existing_tracks(songs_ids)
     if not real_ids_in_dataset:
-        # TODO: Check for something real
-        raise HTTPException(status_code=401, detail="No songs to recommend")
-        # return RecommendedSong(isRandom=True, fromSongs=songs, recommended=songs[0])
-    # return RecommendedSong(isRandom=True, fromSongs=songs, recommended=songs[0])
-    # recommended_song_id = anti_recommender.antirecommend(songs_ids)
-    raise HTTPException(status_code=403, detail="No songs to recommend")
-    # print(recommended_song_id)
-    # from_songs = [song for song in songs if song.id in real_ids_in_dataset]
-    # return RecommendedSong(
-    #     isRandom=False,
-    #     fromSongs=from_songs,
-    #     recommended=Song(id=recommended_song_id, name="This is the recommended song", image="https://photographylife.com/wp-content/uploads/2014/09/Nikon-D750-Image-Samples-2.jpg"),
-    # )
+        # TODO: Change to get a random song!
+        return RecommendedSong(isRandom=True, fromSongs=songs, recommended=songs[0])
+    recommended_song_id = anti_recommender.antirecommend(songs_ids)
+    song = spotify.get_song_from_id(song_id=recommended_song_id)
+    from_songs = [song for song in songs if song.id in real_ids_in_dataset]
+    return RecommendedSong(isRandom=False, fromSongs=from_songs, recommended=song)

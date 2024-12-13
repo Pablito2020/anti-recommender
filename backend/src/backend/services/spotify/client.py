@@ -6,6 +6,8 @@ from starlette.exceptions import HTTPException
 from backend.schemas.recommend import Song
 from backend.schemas.spotify import RecentlyPlayed
 
+from src.backend.schemas.spotify import Track
+
 
 class SpotifyClient:
     def __init__(self, access_token: str):
@@ -19,17 +21,29 @@ class SpotifyClient:
 
     @property
     def recently_played(self) -> List[Song]:
-        recently_played: RecentlyPlayed = RecentlyPlayed(
-            **self.sp.current_user_recently_played()
-        )
-        songs = []
-        for played in recently_played.items:
-            song = Song(
-                id=played.track.id,
-                name=played.track.name,
-                image=None
-                if len(played.track.album.images) == 0
-                else played.track.album.images[0].url,
+        try:
+            recently_played: RecentlyPlayed = RecentlyPlayed(
+                **self.sp.current_user_recently_played()
             )
-            songs.append(song)
-        return songs
+            songs = []
+            for played in recently_played.items:
+                song = Song(
+                    id=played.track.id,
+                    name=played.track.name,
+                    image=None
+                    if len(played.track.album.images) == 0
+                    else played.track.album.images[0].url,
+                )
+                songs.append(song)
+            return songs
+        except SpotifyException:
+            return []
+
+    def get_song_from_id(self, song_id: str) -> Song | None:
+        spotify_track = self.sp.track(track_id=song_id)
+        track = Track(**spotify_track)
+        return Song(
+            id=track.id,
+            name=track.name,
+            image=track.album.images[0].url if len(track.album.images) > 0 else None,
+        )
