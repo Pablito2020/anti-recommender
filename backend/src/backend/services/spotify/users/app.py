@@ -28,6 +28,7 @@ class SpotifyApp:
 
     users: UserRepository
     tokens: TokenRepository
+    users_threshold: int = 20
     time_now: Callable[[], float] = lambda: time.time()
 
     @staticmethod
@@ -45,17 +46,27 @@ class SpotifyApp:
         assert isinstance(is_expired, bool), "Impossible! The time library has a bug"
         return is_expired
 
-    def _create_user(self, mail: Mail) -> Result[User, Error]:
+    def _get_token(self) -> Result[Token, Error]:
         result_token = self.tokens.get_token()
+        if result_token.is_error or (
+            not self._is_token_expired(result_token.success_value)
+        ):
+            return result_token
+        return self.tokens.refresh_token()
+
+    def _create_user(self, mail: Mail) -> Result[User, Error]:
+        result_token = self._get_token()
         if result_token.is_error:
             return result_token
-        token = result_token.success_value
-        if not self._is_token_expired(token):
-            return self.users.add_user(mail=mail, token=token)
-        new_token_result = self.tokens.refresh_token()
-        if new_token_result.is_error:
-            return new_token_result
-        return self.users.add_user(mail=mail, token=new_token_result.success_value)
+        return self.users.add_user(mail=mail, token=result_token.success_value)
+
+    def _delete_first_user(self, users: List[User]) -> Result[None, Error]:
+        first_user: User = min(users, key=lambda user: user.creation_date)
+        token = self._get_token()
+        if token.is_error:
+            return token
+        self.users.delete_user(first_user.mail, token.success_value)
+        return Result.success(None)
 
     @staticmethod
     def _get_mail(mail: str) -> Result[Mail, Error]:
@@ -73,6 +84,10 @@ class SpotifyApp:
         if users.is_error:
             return Result.failure(users.error_value)
         user_list: List[User] = users.success_value
+        if len(user_list) >= self.users_threshold:
+            delete_status = self._delete_first_user(user_list)
+            if delete_status.is_error:
+                return delete_status
         user = list(filter(lambda usr: usr.mail == _mail, user_list))
         if user:
             return SpotifyApp._found_user(user)

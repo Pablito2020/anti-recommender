@@ -12,10 +12,24 @@ class SpotifyUser(BaseModel, UserRepository):  # type: ignore
     app_id: str
 
     def users(self) -> Result[List[User], Error]:
-        return Result.failure(Error("TODO: Implement get users"))
+        return Result.failure(Error("TODO: Implement get users from spotify api"))
 
     def delete_user(self, mail: Mail, token: Token) -> Result[User, Error]:
-        return Result.failure(Error("TODO: Implement delete users"))
+        try:
+            response = requests.delete(
+                self._delete_user_url(mail), headers=self._headers_from_token(token)
+            )
+            if response.status_code == 200:
+                return Result.success(User(mail=mail, creation_date=time.time()))
+            return Result.failure(
+                Error(
+                    f"Couldn't remove user to the whitelist of the app with id: {self.app_id}. Status Code: {response.status_code}. Content: {response.content.decode()}"
+                )
+            )
+        except Exception as e:
+            return Result.failure(
+                Error(f"We couldn't remove user via spotify api reverse hack: {e}")
+            )
 
     def add_user(self, mail: Mail, token: Token) -> Result[User, Error]:
         try:
@@ -54,3 +68,6 @@ class SpotifyUser(BaseModel, UserRepository):  # type: ignore
             "Referer": f"https://developer.spotify.com/dashboard/{self.app_id}/users",
             "User-Agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Mobile Safari/537.36",
         }
+
+    def _delete_user_url(self, mail: Mail) -> str:
+        return f"https://developer.spotify.com/api/ws4d/warp/clients/{self.app_id}/users/{mail.address}"

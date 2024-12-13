@@ -1,8 +1,11 @@
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 
 from backend.common.result import Result, Error
 from backend.services.spotify.users.app import SpotifyApp
 from backend.services.spotify.users.domain import UserRepository, TokenRepository
+
+from src.backend.services.spotify.users.domain.token_repository import Token
+from src.backend.services.spotify.users.domain.user_repository import Mail
 from test.mothers.token import get_token_that_expires_on
 from test.mothers.user import get_user
 
@@ -125,3 +128,37 @@ def test_if_mail_is_invalid_return_error():
     app = SpotifyApp(users=user_repo, tokens=token_repository)
     user = app.add_user("notamail")
     assert user.is_error, "We shouldn't have an user error"
+
+
+def test_if_user_threshold_is_bigger_then_delete_user():
+    current_time = 1000
+
+    def time() -> float:
+        return current_time
+
+    token = get_token_that_expires_on(current_time + 1000)
+    user_repo: UserRepository = MagicMock()
+    token_repository: TokenRepository = MagicMock()
+    token_repository.get_token = MagicMock(return_value=(Result.success(token)))
+
+    user_1 = get_user("added@test.com", creation_date=current_time - 100)
+    user_2 = get_user("added2@test.com", creation_date=current_time - 50)
+    created_user = get_user("added3@test.com", creation_date=current_time)
+
+    def side_effect(mail: Mail, _: Token) -> Result:
+        assert (
+            mail.address == user_1.mail.address
+        ), "The user you're deleting isn't the correct"
+        return Result.success(user_1)
+
+    user_repo.users = MagicMock(return_value=(Result.success([user_1, user_2])))
+    user_repo.delete_user = Mock(side_effect=side_effect)
+    user_repo.add_user = MagicMock(return_value=(Result.success(created_user)))
+
+    app = SpotifyApp(
+        users=user_repo, tokens=token_repository, time_now=time, users_threshold=2
+    )
+    user = app.add_user(created_user.mail.address)
+    print(user)
+    assert not user.is_error, "We shouldn't have an user error"
+    assert user.success_value == created_user
