@@ -8,6 +8,10 @@ import {
   Result,
 } from "../schema/recommender.ts";
 
+const SPOTIFY_TOKEN_LOCALSTORAGE = "spotify-sdk:verifier";
+const SPOTIFY_TOKEN_PKCE =
+  "spotify-sdk:AuthorizationCodeWithPKCEStrategy:token";
+
 const parseAxiosResponse: (response: AxiosResponse) => Result<Recommender> = (
   response,
 ) => {
@@ -58,11 +62,17 @@ const getApiRecommendation: (
 };
 
 export const userIsLoggedIn: () => boolean = () => {
-  const token = localStorage.getItem(
-    "spotify-sdk:AuthorizationCodeWithPKCEStrategy:token",
-  );
-  return token != null;
+  const token = localStorage.getItem(SPOTIFY_TOKEN_LOCALSTORAGE);
+  const pkce = localStorage.getItem(SPOTIFY_TOKEN_PKCE);
+  return token != null || pkce != null;
 };
+
+export function deleteUserToken() {
+  if (userIsLoggedIn()) {
+    localStorage.removeItem(SPOTIFY_TOKEN_LOCALSTORAGE);
+    localStorage.removeItem(SPOTIFY_TOKEN_PKCE);
+  }
+}
 
 export const getRecommendations: () => Promise<Result<Recommender> | null> =
   async () => {
