@@ -57,12 +57,11 @@ const getApiRecommendation: (
   }
 };
 
-export const userIsLoggedIn: () => Promise<boolean> = async () => {
+export const userIsLoggedIn: () => boolean = () => {
   const token = localStorage.getItem(
     "spotify-sdk:AuthorizationCodeWithPKCEStrategy:token",
   );
-  const verifier = localStorage.getItem("spotify-sdk:verifier");
-  return token != undefined || verifier != undefined;
+  return token != null;
 };
 
 export const getRecommendations: () => Promise<Result<Recommender> | null> =
@@ -77,7 +76,7 @@ export const getRecommendations: () => Promise<Result<Recommender> | null> =
       };
     }
     let result: RecommenderResult | null = null;
-    const spotifyClient = await SpotifyApi.performUserAuthorization(
+    await SpotifyApi.performUserAuthorization(
       spotifyClientId,
       frontend,
       Scopes.userRecents,
@@ -85,11 +84,5 @@ export const getRecommendations: () => Promise<Result<Recommender> | null> =
         result = await getApiRecommendation(userToken);
       },
     );
-    if (!spotifyClient.authenticated) {
-      return {
-        isError: true,
-        error: "Spotify couldn't authenticate you... Maybe you're being bad?",
-      };
-    }
     return result;
   };

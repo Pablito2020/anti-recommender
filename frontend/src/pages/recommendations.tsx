@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { getRecommendations } from "../services/recommender.ts";
 import { Typography, Box } from "@mui/material";
 import { Recommender } from "../schema/recommender.ts";
-import { ErrorScreen } from "./error.tsx";
-import { BackButton } from "./back_button.tsx";
-import { Loading } from "./loading.tsx";
-import { SongList } from "./song_list.tsx";
-import { Recommendation } from "./recommendation.tsx";
+import { ErrorScreen } from "../components/error.tsx";
+import { BackButton } from "../components/back_button.tsx";
+import { Loading } from "../components/loading.tsx";
+import { SongList } from "../components/song_list.tsx";
+import { Recommendation } from "../components/recommendation.tsx";
 
 interface SpotifyRecommenderProps {
   onBack: () => void;

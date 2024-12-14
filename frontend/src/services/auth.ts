@@ -1,10 +1,15 @@
 import axios, { AxiosResponse } from "axios";
 import { Result } from "../schema/recommender.ts";
+import { userIsLoggedIn } from "./recommender.ts";
 
-const parseAxiosResponse: (response: AxiosResponse) => Result<null> = (
-  response,
-) => {
+const CURRENT_USER_KEY = "CurrentUser";
+
+const parseAxiosResponse: (
+  response: AxiosResponse,
+  mail: string,
+) => Result<null> = (response, mail) => {
   if (response.status == 200) {
+    localStorage.setItem(CURRENT_USER_KEY, mail);
     return { isError: false, value: null };
   }
   return {
@@ -21,7 +26,7 @@ const addAccount: (mail: string, url: string) => Promise<Result<null>> = async (
     const response = await axios.post(`${url}/user`, {
       mail: mail,
     });
-    return parseAxiosResponse(response);
+    return parseAxiosResponse(response, mail);
   } catch (error: unknown) {
     if (axios.isAxiosError(error))
       return {
@@ -47,3 +52,17 @@ export const addAccountToProject: (
   }
   return await addAccount(email, backend);
 };
+
+export function isUserAuthenticatedInProject(): boolean {
+  return localStorage.getItem(CURRENT_USER_KEY) != null;
+}
+
+export function isAuthenticatedInProjectAndInSpotify(): boolean {
+  return isUserAuthenticatedInProject() && userIsLoggedIn();
+}
+
+export function removeUserFromAuth() {
+  if (isUserAuthenticatedInProject()) {
+    localStorage.removeItem(CURRENT_USER_KEY);
+  }
+}

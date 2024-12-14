@@ -2,30 +2,28 @@ import { useState } from "react";
 import "./App.css";
 import { Box, Button, Typography } from "@mui/material";
 import AntiRecommender from "/antirecommender.svg";
-import Login from "./components/login.tsx";
+import Login from "./pages/login.tsx";
+import {
+  isAuthenticatedInProjectAndInSpotify,
+  isUserAuthenticatedInProject,
+  removeUserFromAuth,
+} from "./services/auth.ts";
+import Recommendations from "./pages/recommendations.tsx";
 
 function App() {
-  const [isInfering, setInfering] = useState<boolean>(false);
-  const onBack = () => {
-    setInfering(false);
+  const [goNext, setGoNext] = useState<boolean>(false);
+  const moveOn = () => {
+    setGoNext(true);
   };
-  const goInfer = () => {
-    setInfering(true);
+  const cleanData = () => {
+    removeUserFromAuth();
   };
-  if (isInfering) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100%",
-          width: "100%",
-        }}
-      >
-        <Login onBack={onBack} />
-      </Box>
-    );
+
+  if (isAuthenticatedInProjectAndInSpotify()) {
+    return <Recommendations onBack={cleanData} />;
+  }
+  if (goNext && !isUserAuthenticatedInProject()) {
+    return <Login onBack={cleanData} />;
   }
   const styles = {
     icon: {
@@ -49,12 +47,7 @@ function App() {
       <Typography variant="h5" gutterBottom>
         Welcome to Spotify Anti-Recommender! Are you ready to be bad?
       </Typography>
-      <Button
-        variant="contained"
-        color="primary"
-        size="large"
-        onClick={goInfer}
-      >
+      <Button variant="contained" color="primary" size="large" onClick={moveOn}>
         Start!
       </Button>
     </Box>

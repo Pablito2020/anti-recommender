@@ -1,15 +1,9 @@
 import React, { useState } from "react";
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { addAccountToProject } from "../services/account.ts";
-import CircularProgress from "@mui/material/CircularProgress";
+import { Box, Button, TextField, Typography } from "@mui/material";
+import { addAccountToProject } from "../services/auth.ts";
 import Recommendations from "./recommendations.tsx";
+import { ErrorScreen } from "../components/error.tsx";
+import { Loading } from "../components/loading.tsx";
 
 interface LoginProps {
   onBack: () => void;
@@ -39,68 +33,16 @@ function Login({ onBack }: LoginProps) {
     postMail();
   };
 
-  const GoBackButton = () => {
-    return (
-      <>
-        <Button onClick={onBack}>Go Back!</Button>
-      </>
-    );
-  };
-
   if (error) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "100vh",
-          padding: 2,
-          backgroundColor: "#f8d7da",
-        }}
-      >
-        <Card
-          sx={{
-            backgroundColor: "#f44336",
-            color: "#fff",
-            width: "100%",
-            maxWidth: 400,
-            padding: 2,
-          }}
-        >
-          <CardContent>
-            <Typography variant="h6" align="center" gutterBottom>
-              An error happened!
-            </Typography>
-            <Typography variant="body1" align="center">
-              {error}
-            </Typography>
-            <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
-              <GoBackButton />
-            </Box>
-          </CardContent>
-        </Card>
-      </Box>
-    );
+    return <ErrorScreen onBack={onBack} error={error} />;
   }
   if (loading) {
     return (
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "100vh",
-          textAlign: "center",
-          padding: 2,
-        }}
-      >
-        <CircularProgress color="secondary" />
-        <Typography variant="h6" mt={2}>
-          We're adding to our project database. Please wait....
-        </Typography>
-      </Box>
+      <Loading
+        message={
+          "We're adding you to our allowed users database. Please wait...."
+        }
+      ></Loading>
     );
   }
 
