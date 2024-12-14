@@ -16,7 +16,7 @@ interface SongListProps {
   pageSize?: number;
 }
 
-const MAX_SONGS_PER_PAGE = 7;
+const MAX_SONGS_PER_PAGE = 5;
 
 export function SongList({
   songs,
