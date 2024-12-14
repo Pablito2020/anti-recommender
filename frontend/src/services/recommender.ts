@@ -1,5 +1,4 @@
-import { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { Scopes } from "./Scopes.ts";
+import { Scopes, SpotifyApi } from "@spotify/web-api-ts-sdk";
 import axios, { AxiosResponse } from "axios";
 import {
   isApiError,
@@ -66,38 +65,31 @@ export const userIsLoggedIn: () => Promise<boolean> = async () => {
   return token != undefined || verifier != undefined;
 };
 
-export const getRecommendations: () => Promise<
-  Result<Recommender>
-> = async () => {
-  const spotifyClientId = window.env.SPOTIFY_CLIENT_ID;
-  const frontend = window.env.FRONTEND_URL;
-  if (!spotifyClientId || !frontend) {
-    return {
-      isError: true,
-      error:
-        "Person who deployed the app didn't specify spotify a client id or frontend id",
-    };
-  }
-  let result: RecommenderResult | null = null;
-  const spotifyClient = await SpotifyApi.performUserAuthorization(
-    spotifyClientId,
-    frontend,
-    Scopes.userRecents,
-    async (userToken) => {
-      result = await getApiRecommendation(userToken);
-    },
-  );
-  if (result == null)
-    return {
-      isError: true,
-      error:
-        "Spotify library isn't working as expected, please send a message to the developers and we'll check that.",
-    };
-  if (!spotifyClient.authenticated) {
-    return {
-      isError: true,
-      error: "Spotify couldn't authenticate you... Maybe you're being bad?",
-    };
-  }
-  return result;
-};
+export const getRecommendations: () => Promise<Result<Recommender> | null> =
+  async () => {
+    const spotifyClientId = window.env.SPOTIFY_CLIENT_ID;
+    const frontend = window.env.FRONTEND_URL;
+    if (!spotifyClientId || !frontend) {
+      return {
+        isError: true,
+        error:
+          "Person who deployed the app didn't specify spotify a client id or frontend id",
+      };
+    }
+    let result: RecommenderResult | null = null;
+    const spotifyClient = await SpotifyApi.performUserAuthorization(
+      spotifyClientId,
+      frontend,
+      Scopes.userRecents,
+      async (userToken) => {
+        result = await getApiRecommendation(userToken);
+      },
+    );
+    if (!spotifyClient.authenticated) {
+      return {
+        isError: true,
+        error: "Spotify couldn't authenticate you... Maybe you're being bad?",
+      };
+    }
+    return result;
+  };
