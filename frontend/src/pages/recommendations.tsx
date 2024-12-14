@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { getRecommendations } from "../services/recommender.ts";
-import { Typography, Box } from "@mui/material";
+import { Box } from "@mui/material";
 import { Recommender } from "../schema/recommender.ts";
 import { ErrorScreen } from "../components/error.tsx";
 import { BackButton } from "../components/back_button.tsx";
 import { Loading } from "../components/loading.tsx";
-import { SongList } from "../components/song_list.tsx";
-import { Recommendation } from "../components/recommendation.tsx";
+import { NormalRecommendation } from "../components/normal_recommendation.tsx";
+import { RandomRecommendation } from "../components/random_recommendation.tsx";
 
 interface SpotifyRecommenderProps {
   onBack: () => void;
@@ -38,19 +38,14 @@ function SpotifyRecommendations({ onBack }: SpotifyRecommenderProps) {
     );
   }
   if (data) {
+    const recommendation = data.isRandom ? (
+      <RandomRecommendation data={data} />
+    ) : (
+      <NormalRecommendation data={data} />
+    );
     return (
       <>
-        <Box sx={{ padding: 3, maxWidth: 600, margin: "auto" }}>
-          <Typography variant="h5" gutterBottom>
-            From the following songs you listened:
-          </Typography>
-          <SongList songs={data.fromSongs} />
-
-          <Typography variant="h6" sx={{ marginTop: 4 }}>
-            Our Recommendation:
-          </Typography>
-          <Recommendation song={data.recommended} />
-        </Box>
+        {recommendation}
         <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
           <BackButton onBack={onBack} />
         </Box>

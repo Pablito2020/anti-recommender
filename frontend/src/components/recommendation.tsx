@@ -1,5 +1,6 @@
 import { Card, CardContent, CardMedia, Typography } from "@mui/material";
 import { Song } from "../schema/recommender.ts";
+import Confetti from "react-confetti-boom";
 
 interface SongProps {
   song: Song;
@@ -11,6 +12,7 @@ export function Recommendation({ song, defaultImage }: SongProps) {
     defaultImage == undefined
       ? "https://www.pngmart.com/files/8/Compact-Disk-PNG-HD-Photo.png"
       : defaultImage;
+
   return (
     <Card
       sx={{
@@ -20,8 +22,21 @@ export function Recommendation({ song, defaultImage }: SongProps) {
         margin: "auto",
         flexWrap: "wrap",
         gap: 1,
+        transition: "background-color 0.3s ease",
+        "&:hover": {
+          backgroundColor: "#707070",
+        },
+        cursor: "pointer",
       }}
+      onClick={() =>
+        window.open(`https://open.spotify.com/track/${song.id}`, "_blank")
+      }
     >
+      <Confetti
+        mode="boom"
+        particleCount={200}
+        colors={["#1ED760", "#FFFFFF", "#121212"]}
+      />
       <CardMedia
         component="img"
         sx={{

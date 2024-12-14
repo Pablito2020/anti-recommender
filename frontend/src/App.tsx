@@ -38,7 +38,11 @@ function App() {
   }, []);
 
   if (isAuthenticatedOnAllPlaces) {
-    return <Recommendations onBack={cleanData} />;
+    return (
+      <>
+        <Recommendations onBack={cleanData} />
+      </>
+    );
   }
   if (goNext && !isAuthenticatedOnProject) {
     return <Login onBack={cleanData} />;
