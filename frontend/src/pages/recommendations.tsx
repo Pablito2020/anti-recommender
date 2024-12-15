@@ -46,7 +46,7 @@ function SpotifyRecommendations({ onBack }: SpotifyRecommenderProps) {
     return (
       <>
         {recommendation}
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+        <Box sx={{ display: "flex", justifyContent: "center" }}>
           <BackButton onBack={onBack} />
         </Box>
       </>
