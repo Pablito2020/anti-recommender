@@ -69,9 +69,14 @@ def recommend_songs_for_user_with_token(data: UserToken) -> RecommendedSong:
         else anti_recommender.antirecommend(songs_ids)
     )
     song = spotify.get_song_from_id(song_id=track_id)
+    from_songs = [song for song in songs if song.id in real_ids_in_dataset]
     if song is None:
-        raise HTTPException(
-            status_code=500,
-            detail=f"We couldn't fetch the song from spotify, but it's id is: {track_id}",
+        could_not_fetch_name_and_image = Song(
+            id=track_id, name="Couldn't fetch name, click to go to the song"
         )
-    return RecommendedSong(isRandom=is_random, fromSongs=songs, recommended=song)
+        return RecommendedSong(
+            isRandom=is_random,
+            fromSongs=from_songs,
+            recommended=could_not_fetch_name_and_image,
+        )
+    return RecommendedSong(isRandom=is_random, fromSongs=from_songs, recommended=song)

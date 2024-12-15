@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 from pydantic import BaseModel
 
@@ -6,7 +6,7 @@ from pydantic import BaseModel
 class Song(BaseModel):
     id: str
     name: str
-    image: Optional[str]
+    image: str | None = None
 
 
 class RecommendedSong(BaseModel):
