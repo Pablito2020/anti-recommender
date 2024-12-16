@@ -18,7 +18,10 @@ from src.backend.spotify.app import (
 from src.backend.spotify.dependencies import get_spotify_app
 
 from src.backend.schemas.recommend import Song
-from src.backend.services.antirecommender import AntiRecommenderService
+from src.backend.services.antirecommender import (
+    AntiRecommenderService,
+    get_anti_recommender,
+)
 
 app = FastAPI(
     title="AntiRecommender API",
@@ -78,10 +81,10 @@ def add_user_to_spotify_project(
     response_model=RecommendedSong,
     status_code=200,
 )
-def recommend_songs_for_user_with_token(data: UserToken) -> RecommendedSong:
-    anti_recommender = AntiRecommenderService(
-        data_path="./data/spotify_tracks_dataset.csv"
-    )
+def recommend_songs_for_user_with_token(
+    data: UserToken,
+    anti_recommender: AntiRecommenderService = Depends(get_anti_recommender),
+) -> RecommendedSong:
     spotify = SpotifyClient(access_token=data.access_token)
     songs: List[Song] = spotify.recently_played
     songs_ids = [song.id for song in songs]

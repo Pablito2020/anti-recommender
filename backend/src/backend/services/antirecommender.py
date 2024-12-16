@@ -159,3 +159,12 @@ class AntiRecommenderService:
 
         """
         return str(self.data.sample(n=1)["track_id"].iloc[0])
+
+
+_anti_recommender = AntiRecommenderService(
+    data_path="./data/spotify_tracks_dataset.csv"
+)
+
+
+async def get_anti_recommender() -> AntiRecommenderService:
+    return _anti_recommender

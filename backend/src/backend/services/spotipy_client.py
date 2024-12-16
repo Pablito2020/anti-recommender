@@ -1,5 +1,6 @@
 from typing import List
 
+from pydantic import ValidationError
 from spotipy import Spotify, SpotifyException
 from starlette.exceptions import HTTPException
 
@@ -25,17 +26,10 @@ class SpotifyClient:
             recently_played: RecentlyPlayed = RecentlyPlayed(
                 **self.sp.current_user_recently_played()
             )
-            songs = []
-            for played in recently_played.items:
-                song = Song(
-                    id=played.track.id,
-                    name=played.track.name,
-                    image=None
-                    if len(played.track.album.images) == 0
-                    else played.track.album.images[0].url,
-                )
-                songs.append(song)
-            return songs
+            return [
+                SpotifyClient.__to_song(played.track)
+                for played in recently_played.items
+            ]
         except SpotifyException:
             return []
 
@@ -43,12 +37,18 @@ class SpotifyClient:
         try:
             spotify_track = self.sp.track(track_id=song_id)
             track = Track(**spotify_track)
-            return Song(
-                id=track.id,
-                name=track.name,
-                image=track.album.images[0].url
-                if len(track.album.images) > 0
-                else None,
-            )
-        except SpotifyException:
+            return SpotifyClient.__to_song(track)
+        except SpotifyException | ValidationError | ValueError:
             return None
+
+    @staticmethod
+    def __to_song(track: Track) -> Song:
+        return Song(
+            id=track.id, name=track.name, image=SpotifyClient.__get_image_url(track)
+        )
+
+    @staticmethod
+    def __get_image_url(track: Track) -> str | None:
+        if len(track.album.images) > 0:
+            return track.album.images[0].url
+        return None
