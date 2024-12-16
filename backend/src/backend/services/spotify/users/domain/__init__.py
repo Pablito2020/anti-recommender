@@ -1,9 +1,9 @@
-from backend.services.spotify.users.domain.user_repository import (
+from src.backend.services.spotify.users.domain.user_repository import (
     User,
     UserRepository,
     Mail,
 )
-from backend.services.spotify.users.domain.token_repository import (
+from src.backend.services.spotify.users.domain.token_repository import (
     TokenRepository,
     Token,
     SpotifyToken,

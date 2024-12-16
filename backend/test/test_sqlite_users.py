@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from backend.services.spotify.users.infra.sqlite.users import SqliteUsersRepository
+from src.backend.services.spotify.users.infra.sqlite.users import SqliteUsersRepository
 from test.mothers.user import get_user
 
 sqlite_path = "./users-test.db"
@@ -30,4 +30,4 @@ def test_adding_a_user():
     users_result = user_repo.users()
     assert not users_result.is_error
     assert len(users_result.success_value) == 1
-    assert users_result.success_value[0].dict() == user.dict()
+    assert users_result.success_value[0] == user

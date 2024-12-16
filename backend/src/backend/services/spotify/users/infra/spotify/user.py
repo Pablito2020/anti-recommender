@@ -4,11 +4,11 @@ from typing import List, Dict
 import requests
 from pydantic import BaseModel
 
-from backend.common.result import Result, Error
-from backend.services.spotify.users.domain import Token, UserRepository, Mail, User
+from src.backend.common.result import Result, Error
+from src.backend.services.spotify.users.domain import Token, UserRepository, Mail, User
 
 
-class SpotifyUser(BaseModel, UserRepository):  # type: ignore
+class SpotifyUser(BaseModel, UserRepository):
     app_id: str
 
     def users(self) -> Result[List[User], Error]:

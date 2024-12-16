@@ -1,25 +1,25 @@
 from dataclasses import dataclass, field
 from typing import List
 
-from backend.services.spotify.users.infra.spotify.token import (
+from src.backend.services.spotify.users.infra.spotify.token import (
     SpotifyToken as SpotifyTokenService,
 )
-from backend.services.spotify.users.infra.spotify.user import SpotifyUser
+from src.backend.services.spotify.users.infra.spotify.user import SpotifyUser
 
-from backend.common.result import Result, Error
-from backend.services.spotify.users.domain import (
+from src.backend.common.result import Result, Error
+from src.backend.services.spotify.users.domain import (
     TokenRepository,
     Token,
     UserRepository,
     User,
     Mail,
 )
-from backend.services.spotify.users.infra.sqlite.token import SqliteTokenRepository
-from backend.services.spotify.users.infra.sqlite.users import SqliteUsersRepository
+from src.backend.services.spotify.users.infra.sqlite.token import SqliteTokenRepository
+from src.backend.services.spotify.users.infra.sqlite.users import SqliteUsersRepository
 
 
 @dataclass
-class RepositoryImplementation(TokenRepository, UserRepository):  # type: ignore
+class RepositoryImplementation(TokenRepository, UserRepository):
     """
     It's a cache for our users, and a database for our tokens.
     """

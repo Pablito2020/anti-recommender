@@ -3,14 +3,14 @@ from dataclasses import dataclass
 
 import requests
 
-from backend.common.result import Result, Error
-from backend.services.spotify.users.domain import TokenRepository, Token
+from src.backend.common.result import Result, Error
+from src.backend.services.spotify.users.domain import TokenRepository, Token
 
 OAUTH_TOKEN_URL = "https://accounts.spotify.com/api/token"
 
 
 @dataclass
-class SpotifyToken(TokenRepository):  # type: ignore
+class SpotifyToken(TokenRepository):
     """
     Reverse-engineered requests for refreshing a spotify token
     You should specify the user_id, where

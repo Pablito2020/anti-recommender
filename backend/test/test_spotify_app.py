@@ -1,8 +1,8 @@
 from unittest.mock import MagicMock, Mock
 
-from backend.common.result import Result, Error
-from backend.services.spotify.users.app import SpotifyApp
-from backend.services.spotify.users.domain import UserRepository, TokenRepository
+from src.backend.common.result import Result, Error
+from src.backend.services.spotify.users.app import SpotifyApp
+from src.backend.services.spotify.users.domain import UserRepository, TokenRepository
 
 from src.backend.services.spotify.users.domain.token_repository import Token
 from src.backend.services.spotify.users.domain.user_repository import Mail
@@ -56,11 +56,12 @@ def test_if_user_is_not_in_database_create_it():
 def test_if_repository_add_fails_we_dont_add_user():
     current_time = 100_000
     already_existing_user = get_user("added@test.com")
-    new_user = get_user("nonadded@test.com", creation_date=current_time)
 
     user_repo: UserRepository = MagicMock()
     user_repo.users = MagicMock(return_value=(Result.success([already_existing_user])))
-    user_repo.add_user = MagicMock(return_value=(Result.failure(new_user)))
+    user_repo.add_user = MagicMock(
+        return_value=(Result.failure(Error("error adding user")))
+    )
 
     def time() -> float:
         return current_time
@@ -159,6 +160,5 @@ def test_if_user_threshold_is_bigger_then_delete_user():
         users=user_repo, tokens=token_repository, time_now=time, users_threshold=2
     )
     user = app.add_user(created_user.mail.address)
-    print(user)
     assert not user.is_error, "We shouldn't have an user error"
     assert user.success_value == created_user

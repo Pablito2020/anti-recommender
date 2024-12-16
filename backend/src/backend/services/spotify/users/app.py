@@ -75,8 +75,8 @@ class SpotifyApp:
         if result_token.is_error or (
             not self._is_token_expired(result_token.success_value)
         ):
-            return result_token  # type: ignore
-        return self.tokens.refresh_token()  # type: ignore
+            return result_token
+        return self.tokens.refresh_token()
 
     def _create_user(
         self, mail: Mail

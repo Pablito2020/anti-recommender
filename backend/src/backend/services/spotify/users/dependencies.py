@@ -2,8 +2,8 @@ import os
 from functools import wraps
 from typing import TypeVar, Callable, Any
 
-from backend.services.spotify.users.app import SpotifyApp
-from backend.services.spotify.users.infra.repository_implementation import (
+from src.backend.services.spotify.users.app import SpotifyApp
+from src.backend.services.spotify.users.infra.repository_implementation import (
     RepositoryImplementation,
 )
 
