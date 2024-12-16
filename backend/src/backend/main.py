@@ -3,11 +3,19 @@ from typing import List
 from fastapi import FastAPI, Depends, HTTPException
 from starlette.middleware.cors import CORSMiddleware
 
-from backend.schemas.auth import UserToken, MailPetition
-from backend.schemas.recommend import RecommendedSong
-from backend.services.spotify.client import SpotifyClient
-from backend.services.spotify.users.app import SpotifyApp
-from backend.services.spotify.users.dependencies import get_spotify_app
+from src.backend.schemas.auth import UserToken, MailPetition
+from src.backend.schemas.recommend import RecommendedSong
+from src.backend.services.spotify.client import SpotifyClient
+from src.backend.services.spotify.users.app import (
+    SpotifyApp,
+    MailError,
+    FetchUsersError,
+    DuplicatedUserInDatabaseError,
+    DeletingUserError,
+    CreatingUserError,
+    TokenExpired,
+)
+from src.backend.services.spotify.users.dependencies import get_spotify_app
 
 from src.backend.schemas.recommend import Song
 from src.backend.services.antirecommender import AntiRecommenderService
@@ -45,7 +53,23 @@ def add_user_to_spotify_project(
 ) -> str:
     result = spotify_app.add_user(data.mail)
     if result.is_error:
-        raise HTTPException(status_code=404, detail=result.error_value.message)
+        match result.error_value:
+            case MailError():
+                raise HTTPException(status_code=400, detail=result.error_value.message)
+            case DuplicatedUserInDatabaseError():
+                raise HTTPException(
+                    status_code=409,
+                    detail="You're saved twice on our database. Please contact the admins",
+                )
+            case (
+                FetchUsersError()
+                | DeletingUserError()
+                | CreatingUserError()
+                | TokenExpired()
+            ):
+                raise HTTPException(status_code=502, detail=result.error_value.message)
+            case _:
+                raise HTTPException(status_code=500, detail=result.error_value.message)
     return "ok"
 
 

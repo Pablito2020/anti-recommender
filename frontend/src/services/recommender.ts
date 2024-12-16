@@ -1,12 +1,12 @@
 import { Scopes, SpotifyApi } from "@spotify/web-api-ts-sdk";
 import axios, { AxiosResponse } from "axios";
 import {
-  isApiError,
   isRecommender,
   Recommender,
   RecommenderResult,
-  Result,
 } from "../schema/recommender.ts";
+import { Result } from "../schema/result.ts";
+import { isApiError } from "../schema/error.ts";
 
 const SPOTIFY_TOKEN_LOCALSTORAGE = "spotify-sdk:verifier";
 const SPOTIFY_TOKEN_PKCE =

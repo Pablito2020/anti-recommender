@@ -1,8 +1,4 @@
-export interface Result<T> {
-  isError: boolean;
-  value?: T;
-  error?: string;
-}
+import { Result } from "./result.ts";
 
 export interface Song {
   id: string;
@@ -16,10 +12,6 @@ export interface Recommender {
   recommended: Song;
 }
 
-export interface ApiError {
-  detail: string;
-}
-
 export const isRecommender = (
   recommendation: unknown,
 ): recommendation is Recommender =>
@@ -28,12 +20,5 @@ export const isRecommender = (
   Object.hasOwn(recommendation, "isRandom") &&
   // @ts-expect-error: We're sure it exists
   typeof recommendation.isRandom === "boolean";
-
-export const isApiError = (error: unknown): error is ApiError =>
-  typeof error === "object" &&
-  error !== null &&
-  Object.hasOwn(error, "detail") &&
-  // @ts-expect-error: We're sure it exists
-  typeof error.detail === "string";
 
 export type RecommenderResult = Result<Recommender>;

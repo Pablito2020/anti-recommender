@@ -23,7 +23,6 @@ export function ErrorScreen({ onBack, error }: ErrorProps) {
           backgroundColor: "#f44336",
           color: "#fff",
           width: "100%",
-          maxWidth: 400,
           padding: 2,
         }}
       >
