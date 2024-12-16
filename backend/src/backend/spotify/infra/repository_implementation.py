@@ -1,21 +1,21 @@
 from dataclasses import dataclass, field
 from typing import List
 
-from src.backend.services.spotify.users.infra.spotify.token import (
+from src.backend.spotify.infra.spotify.token import (
     SpotifyToken as SpotifyTokenService,
 )
-from src.backend.services.spotify.users.infra.spotify.user import SpotifyUser
+from src.backend.spotify.infra.spotify.user import SpotifyUser
 
-from src.backend.common.result import Result, Error
-from src.backend.services.spotify.users.domain import (
+from src.backend.spotify.result import Result, Error
+from src.backend.spotify.domain import (
     TokenRepository,
     Token,
     UserRepository,
     User,
     Mail,
 )
-from src.backend.services.spotify.users.infra.sqlite.token import SqliteTokenRepository
-from src.backend.services.spotify.users.infra.sqlite.users import SqliteUsersRepository
+from src.backend.spotify.infra.sqlite.token import SqliteTokenRepository
+from src.backend.spotify.infra.sqlite.users import SqliteUsersRepository
 
 
 @dataclass

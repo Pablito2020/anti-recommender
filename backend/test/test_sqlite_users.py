@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from src.backend.services.spotify.users.infra.sqlite.users import SqliteUsersRepository
+from src.backend.spotify.infra.sqlite.users import SqliteUsersRepository
 from test.mothers.user import get_user
 
 sqlite_path = "./users-test.db"

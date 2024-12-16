@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from pydantic import BaseModel
 
-from src.backend.common.result import Result, Error
+from src.backend.spotify.result import Result, Error
 
 
 class SpotifyToken(BaseModel):

@@ -4,8 +4,8 @@ from typing import List, Dict
 import requests
 from pydantic import BaseModel
 
-from src.backend.common.result import Result, Error
-from src.backend.services.spotify.users.domain import Token, UserRepository, Mail, User
+from src.backend.spotify.result import Result, Error
+from src.backend.spotify.domain import Token, UserRepository, Mail, User
 
 
 class SpotifyUser(BaseModel, UserRepository):

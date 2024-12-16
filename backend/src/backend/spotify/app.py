@@ -4,12 +4,12 @@ from typing import List, Callable
 
 from pydantic import ValidationError
 
-from src.backend.common.result import Result, Error
-from src.backend.services.spotify.users.domain.token_repository import (
+from src.backend.spotify.result import Result, Error
+from src.backend.spotify.domain.token_repository import (
     TokenRepository,
     Token,
 )
-from src.backend.services.spotify.users.domain.user_repository import (
+from src.backend.spotify.domain.user_repository import (
     UserRepository,
     User,
     Mail,

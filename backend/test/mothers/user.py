@@ -1,4 +1,4 @@
-from backend.services.spotify.users.domain import User, Mail
+from src.backend.spotify.domain import User, Mail
 
 
 def get_user(mail: str, creation_date: float = 1000) -> User:

@@ -3,8 +3,8 @@ from typing import List
 
 from pydantic import BaseModel, EmailStr
 
-from src.backend.common.result import Result, Error
-from src.backend.services.spotify.users.domain.token_repository import Token
+from src.backend.spotify.result import Result, Error
+from src.backend.spotify.domain.token_repository import Token
 
 
 class Mail(BaseModel):

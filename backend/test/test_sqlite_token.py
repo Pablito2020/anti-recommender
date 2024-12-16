@@ -3,8 +3,8 @@ import os
 
 import pytest
 
-from src.backend.services.spotify.users.domain import Token
-from src.backend.services.spotify.users.infra.sqlite.token import SqliteTokenRepository
+from src.backend.spotify.domain import Token
+from src.backend.spotify.infra.sqlite.token import SqliteTokenRepository
 
 sqlite_path = "./token-test.db"
 

@@ -5,8 +5,8 @@ from starlette.middleware.cors import CORSMiddleware
 
 from src.backend.schemas.auth import UserToken, MailPetition
 from src.backend.schemas.recommend import RecommendedSong
-from src.backend.services.spotify.client import SpotifyClient
-from src.backend.services.spotify.users.app import (
+from src.backend.services.spotipy_client import SpotifyClient
+from src.backend.spotify.app import (
     SpotifyApp,
     MailError,
     FetchUsersError,
@@ -15,7 +15,7 @@ from src.backend.services.spotify.users.app import (
     CreatingUserError,
     TokenExpired,
 )
-from src.backend.services.spotify.users.dependencies import get_spotify_app
+from src.backend.spotify.dependencies import get_spotify_app
 
 from src.backend.schemas.recommend import Song
 from src.backend.services.antirecommender import AntiRecommenderService

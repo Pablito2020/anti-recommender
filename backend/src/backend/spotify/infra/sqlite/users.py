@@ -2,8 +2,8 @@ import sqlite3
 from dataclasses import dataclass
 from typing import List
 
-from src.backend.common.result import Result, Error
-from src.backend.services.spotify.users.domain.user_repository import User, Mail
+from src.backend.spotify.result import Result, Error
+from src.backend.spotify.domain.user_repository import User, Mail
 
 
 @dataclass

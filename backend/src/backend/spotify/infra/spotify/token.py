@@ -3,8 +3,8 @@ from dataclasses import dataclass
 
 import requests
 
-from src.backend.common.result import Result, Error
-from src.backend.services.spotify.users.domain import TokenRepository, Token
+from src.backend.spotify.result import Result, Error
+from src.backend.spotify.domain import TokenRepository, Token
 
 OAUTH_TOKEN_URL = "https://accounts.spotify.com/api/token"
 

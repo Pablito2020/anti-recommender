@@ -1,4 +1,4 @@
-from backend.services.spotify.users.domain import Token
+from src.backend.spotify.domain import Token
 
 
 def get_token_that_expires_on(expires_at: float) -> Token:
