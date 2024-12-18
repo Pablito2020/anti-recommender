@@ -4,16 +4,18 @@ import numpy as np
 from sklearn.cluster import KMeans
 from scipy.spatial.distance import cdist
 
+DEFAULT_NUMBER_CLUSTERS = 30
+
 
 class AntiRecommenderService:
     _instance: Optional["AntiRecommenderService"] = None
     _data: pd.DataFrame = None
-    _clusters: Optional[np.ndarray[Any, np.dtype[np.float64]]] = None
+    _clusters_centers: Optional[np.ndarray[Any, np.dtype[np.float64]]] = None
     data_path: str = ""
-    num_clusters: int = 10
+    num_clusters: int = DEFAULT_NUMBER_CLUSTERS
 
     def __new__(
-        cls, data_path: str, num_clusters: int = 10
+        cls, data_path: str, num_clusters: int = DEFAULT_NUMBER_CLUSTERS
     ) -> "AntiRecommenderService":
         if cls._instance is None:
             cls._instance = super().__new__(cls)
@@ -66,7 +68,7 @@ class AntiRecommenderService:
         numerical_data = self.data[self.numerical_features].values
         kmeans = KMeans(n_clusters=self.num_clusters, random_state=42)
         self.data["cluster"] = kmeans.fit_predict(numerical_data)
-        self._clusters = kmeans.cluster_centers_
+        self._clusters_centers = kmeans.cluster_centers_
 
     def _get_cluster_of_tracks(self, track_ids: List[str]) -> int:
         user_tracks = self._get_user_tracks(track_ids)
@@ -74,13 +76,12 @@ class AntiRecommenderService:
         return int(user_cluster)
 
     def _find_furthest_cluster(self, user_cluster: int) -> int:
+        assert (
+            self._clusters_centers is not None
+        ), "You shouldn't call this if we don't have any clusters..."
         distances = cdist(
-            [
-                self._clusters[user_cluster]
-                if self._clusters is not None
-                else np.empty((0,))
-            ],
-            self._clusters if self._clusters is not None else np.empty((0, 0)),
+            [self._clusters_centers[user_cluster]],
+            self._clusters_centers,
             metric="euclidean",
         )
         furthest_cluster = np.argmax(distances)
@@ -93,6 +94,34 @@ class AntiRecommenderService:
         categorical_profile: np.ndarray[Any, np.dtype[np.object_]],
         alpha: float,
     ) -> str:
+        """
+        Do:
+            - For each numerical value of the dataset:
+               | Song id | num. value 1 | num. value 2 | ...  |
+               |   x1    |     x1a      |    x1b       | ...  |
+               |   x2    |     x2a      |    x2b       | ...  |
+            - And our numerical values:
+               |   ___   |    alpha1    |    alpha2    | ...  |
+            Do:
+               |   x1    | x1a - alpha1 | x1b - alpha2 | ...  |
+               |   x2    | x2a - alpha1 | x2b - alpha2 | ...  |
+
+            - For each categorical value of the dataset:
+               | Song id | cat. value 1 | cat. value 2 | ...  |
+               |   x1    |     x1a      |    x1b       | ...  |
+               |   x2    |     x2a      |    x2b       | ...  |
+            - And our categorical values:
+               |   ___   |    alpha1    |    alpha2    | ...  |
+            Do:
+             (in python, just like C, 1 it's True and 0 is False)
+               |   x1    | x1a != alpha1 | x1b != alpha2 | ...  |
+               |   x2    | x2a != alpha1 | x2b != alpha2 | ...  |
+               This means, if categorical are different, the rows will have more 1's
+               If they are similar, they will have more 0's
+
+            Then, we combine both distances and get the minimum one for the closest song
+
+        """
         cluster_songs = self.data[self.data["cluster"] == cluster]
         numerical_distances = np.linalg.norm(
             cluster_songs[self.numerical_features].values - numerical_profile, axis=1
@@ -107,7 +136,7 @@ class AntiRecommenderService:
         closest_song_index = np.argmin(combined_distances)
         return str(cluster_songs.iloc[closest_song_index]["track_id"])
 
-    def antirecommend(self, user_track_ids: List[str], alpha: float = 0.7) -> str:
+    def antirecommend(self, user_track_ids: List[str], alpha: float = 0.6) -> str:
         """
         Finds and returns a track ID that is outside the user's comfort zone but still somewhat similar.
 
@@ -121,7 +150,7 @@ class AntiRecommenderService:
         Returns:
             str: The track ID of the recommended song.
         """
-        if self._clusters is None:
+        if self._clusters_centers is None:
             self._initialize_clusters()
 
         numerical_profile, categorical_profile = self._calculate_profiles(
