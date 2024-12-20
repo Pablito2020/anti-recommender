@@ -82,6 +82,6 @@ class Cursors(BaseModel):
 class RecentlyPlayed(BaseModel):
     items: List[PlayedItem]
     next: Optional[str]
-    cursors: Cursors
+    cursors: Optional[Cursors]
     limit: int
     href: str
